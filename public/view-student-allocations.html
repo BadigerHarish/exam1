@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Student Allocations - Exam Hall Management System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        header {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            color: white;
+            padding: 0;
+            position: sticky;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        nav ul {
+            list-style: none;
+            padding: 0;
+            text-align: center;
+            margin: 0;
+            display: flex;
+            justify-content: space-between; /* Changed to space-between */
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2px;
+        }
+        nav ul li {
+            position: relative;
+        }
+        nav ul li a {
+            color: #e2e8f0;
+            text-decoration: none;
+            padding: 16px 20px;
+            display: block;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            position: relative;
+            border-radius: 8px;
+            margin: 4px;
+        }
+        nav ul li a::before {
+            content: '';
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%) scaleX(0);
+            width: 60%;
+            height: 2px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            transition: transform 0.3s ease;
+        }
+        nav ul li a:hover {
+            background: rgba(59, 130, 246, 0.1);
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+        nav ul li a:hover::before {
+            transform: translateX(-50%) scaleX(1);
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            min-width: 200px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            z-index: 1001;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            border-radius: 12px;
+            overflow: hidden;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-top: 8px;
+        }
+        .dropdown-content a {
+            color: #1e293b;
+            padding: 14px 20px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            position: relative;
+            border-left: 3px solid transparent;
+        }
+        .dropdown-content a:hover {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+            color: #3b82f6;
+            border-left-color: #3b82f6;
+            padding-left: 24px;
+        }
+        .dropdown:hover .dropdown-content {
+            display: block;
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        main {
+            padding: 40px 20px;
+            text-align: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: clamp(2rem, 4vw, 2.5rem);
+            margin-bottom: 25px;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            font-weight: 700;
+        }
+        #msg {
+            max-width: 800px;
+            margin: 0 auto 20px;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-weight: 500;
+            text-align: center;
+            display: none;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }
+        .message-box.success {
+            background: linear-gradient(135deg, #06ffa5 0%, #06d6a0 100%);
+            color: #065f46;
+            border: 1px solid #06ffa5;
+        }
+        .message-box.error {
+            background: linear-gradient(135deg, #ff006e 0%, #e63946 100%);
+            color: white;
+            border: 1px solid #ff006e;
+        }
+        table {
+            width: 100%;
+            margin: 0 auto;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        th, td {
+            padding: 14px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            text-align: center;
+            font-size: 14px;
+        }
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        tbody tr {
+            transition: all 0.3s ease;
+        }
+        tbody tr:hover {
+            background: rgba(102, 126, 234, 0.08);
+            transform: scale(1.002);
+        }
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            color: white;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+            margin: 2px;
+        }
+        .edit-btn {
+            background: linear-gradient(135deg, #3a86ff 0%, #2563eb 100%);
+            box-shadow: 0 4px 12px rgba(58, 134, 255, 0.3);
+        }
+        .edit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(58, 134, 255, 0.45);
+        }
+        .delete-btn {
+            background: linear-gradient(135deg, #ff006e 0%, #e63946 100%);
+            box-shadow: 0 4px 12px rgba(255, 0, 110, 0.3);
+        }
+        .delete-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(255, 0, 110, 0.45);
+        }
+        .logout-btn {
+            background: linear-gradient(135deg, #ff006e 0%, #e63946 100%);
+            box-shadow: 0 4px 12px rgba(255, 0, 110, 0.3);
+        }
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(255, 0, 110, 0.45);
+        }
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                gap: 0;
+            }
+            nav ul li {
+                width: 100%;
+            }
+            nav ul li a {
+                border-radius: 0;
+                margin: 0;
+            }
+            .dropdown-content {
+                position: static;
+                transform: none;
+                width: 100%;
+                margin-top: 0;
+                border-radius: 0;
+            }
+            .dropdown:hover .dropdown-content {
+                transform: none;
+            }
+            table {
+                font-size: 12px;
+            }
+            th, td {
+                padding: 10px 6px;
+            }
+            button {
+                padding: 6px 10px;
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="/home">Home</a></li>
+                <li><a href="/dashboard">Dashboard</a></li>
+                <li class="dropdown">
+                    <a href="#">Exams</a>
+                    <div class="dropdown-content">
+                        <a href="/add-exam">Add Exam</a>
+                        <a href="/view-exam">View Exams</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#">Rooms</a>
+                    <div class="dropdown-content">
+                        <a href="/add-room">Add Room</a>
+                        <a href="/view-room">View Rooms</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#">Subjects</a>
+                    <div class="dropdown-content">
+                        <a href="/add-subject">Add Subject</a>
+                        <a href="/view-subject">View Subjects</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#">Teachers</a>
+                    <div class="dropdown-content">
+                        <a href="/add-teacher">Add Teacher</a>
+                        <a href="/view-teacher">View Teachers</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#">Allocations</a>
+                    <div class="dropdown-content">
+                        <a href="/add-allocations">Add Room Allocation</a>
+                        <a href="/view-allocations">View Room Allocations</a>
+                        <a href="/student-allocations">Add Student Allocation</a>
+                        <a href="/view-student-allocations">View Student Allocations</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#">Students</a>
+                    <div class="dropdown-content">
+                        <a href="/add-student">Add Student</a>
+                        <a href="/view-student">View Students</a>
+                    </div>
+                </li>
+                <li><a href="/register">Logout</a></li>
+                <li id="logout-nav-item" style="margin-left: auto; display: none;">
+                  <button id="logoutBtn" class="logout-btn">Logout</button>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h1>View Student Allocations</h1>
+        <div id="msg"></div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Student ID</th>
+                    <th>Semester</th>
+                    <th>Branch</th>
+                    <th>Course</th>
+                    <th>Room Name</th>
+                    <th>Room Floor</th>
+                    <th>Seat Number</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="studentAllocationsTableBody"></tbody>
+        </table>
+    </main>
+    <script>
+        const msgDiv = document.getElementById('msg');
+        const tableBody = document.getElementById('studentAllocationsTableBody');
+        const logoutNavItem = document.getElementById('logout-nav-item');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        const API_BASE_URL = 'http://127.0.0.1:5000'; // Your Flask backend URL
+
+        let allStudentAllocations = []; // To store fetched student allocation data
+        let currentStudentId = null; // To store the student ID from sessionStorage
+
+        function showMessage(type, message) {
+            msgDiv.className = `message-box ${type}`;
+            msgDiv.innerHTML = message;
+            msgDiv.style.display = 'block';
+            msgDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            setTimeout(() => msgDiv.style.display = 'none', 3000);
+        }
+
+        async function fetchStudentAllocations() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/student_allocations`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                allStudentAllocations = await response.json();
+                renderStudentAllocations();
+            } catch (error) {
+                console.error("Error fetching student allocations:", error);
+                showMessage('error', '❌ Failed to load student allocations. Please try again later.');
+                tableBody.innerHTML = `<tr><td colspan="8">Failed to load student allocations.</td></tr>`;
+            }
+        }
+
+        function renderStudentAllocations() {
+            tableBody.innerHTML = '';
+
+            let filteredAllocations = allStudentAllocations;
+            if (currentStudentId) {
+              filteredAllocations = allStudentAllocations.filter(a => a.student_id === currentStudentId);
+            }
+
+            if (filteredAllocations.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="9">No student allocations found for ID: ${currentStudentId || 'N/A'}.</td></tr>`;
+                return;
+            }
+
+            filteredAllocations.forEach(a => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${a.student_name || '-'}</td>
+                    <td>${a.student_id || '-'}</td>
+                    <td>${a.student_semester || '-'}</td>
+                    <td>${a.student_branch || '-'}</td>
+                    <td>${a.student_course || '-'}</td>
+                    <td>${a.room_name || '-'}</td>
+                    <td>${a.room_floor || '-'}</td>
+                    <td>Seat: ${a.seat_number !== undefined && a.seat_number !== null ? a.seat_number : '-'}</td>
+                    <td>
+                        <button class="edit-btn" onclick="editStudentAllocation('${a._id}')">Edit</button>
+                        <button class="delete-btn" onclick="deleteStudentAllocation('${a._id}')">Delete</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        window.deleteStudentAllocation = async (id) => {
+            if (confirm('Are you sure you want to delete this student allocation?')) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/student_allocations/${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    const result = await response.json();
+                    if (response.ok) {
+                        showMessage('success', `✅ ${result.message}`);
+                        fetchStudentAllocations(); // Refresh table
+                    } else {
+                        showMessage('error', `❌ ${result.message || 'Failed to delete student allocation.'}`);
+                    }
+                } catch (error) {
+                    console.error("Error deleting student allocation:", error);
+                    showMessage('error', 'An error occurred while deleting the student allocation.');
+                }
+            }
+        }
+
+        window.editStudentAllocation = async (id) => {
+            const alloc = allStudentAllocations.find(a => a._id === id);
+            if (!alloc) {
+                showMessage('error', 'Student allocation not found for editing.');
+                return;
+            }
+
+            const newStudentName = prompt("Edit Student Name:", alloc.student_name);
+            const newStudentId = prompt("Edit Student ID:", alloc.student_id);
+            const newStudentSemester = prompt("Edit Student Semester:", alloc.student_semester);
+            const newStudentBranch = prompt("Edit Student Branch:", alloc.student_branch);
+            const newStudentCourse = prompt("Edit Student Course:", alloc.student_course);
+            const newRoomName = prompt("Edit Room Name:", alloc.room_name);
+            const newRoomFloor = prompt("Edit Room Floor:", alloc.room_floor);
+            const newSeatNumber = prompt("Edit Seat Number:", alloc.seat_number);
+
+            if (!newStudentName || !newStudentId || !newStudentSemester || !newStudentBranch || !newStudentCourse || !newRoomName || !newRoomFloor || !newSeatNumber) {
+                showMessage('error', '⚠️ All fields are required for editing!');
+                return;
+            }
+
+            const updatedStudentAllocationData = {
+                student_name: newStudentName.trim(),
+                student_id: newStudentId.trim(),
+                student_semester: newStudentSemester.trim(),
+                student_branch: newStudentBranch.trim(),
+                student_course: newStudentCourse.trim(),
+                room_name: newRoomName.trim(),
+                room_floor: newRoomFloor.trim(),
+                seat_number: newSeatNumber.trim()
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/student_allocations/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updatedStudentAllocationData)
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    showMessage('success', `✅ ${result.message}`);
+                    fetchStudentAllocations(); // Refresh table
+                } else {
+                    showMessage('error', `❌ ${result.message || 'Failed to update student allocation.'}`);
+                }
+            } catch (error) {
+                console.error("Error updating student allocation:", error);
+                showMessage('error', 'An error occurred while updating the student allocation.');
+            }
+        };
+
+        // Read student ID from sessionStorage on page load
+        const currentUserString = sessionStorage.getItem('currentUser');
+        if (currentUserString) {
+            const currentUser = JSON.parse(currentUserString);
+            if (currentUser.type === 'student') {
+                currentStudentId = currentUser.id;
+                // Optional: Display student name/ID somewhere on this page if needed
+                logoutNavItem.style.display = 'block'; // Show logout button for students
+                logoutBtn.addEventListener('click', () => {
+                    sessionStorage.removeItem('currentUser');
+                    window.location.href = '/register';
+                });
+            } else {
+                logoutNavItem.style.display = 'none'; // Hide logout button for other users
+            }
+        } else {
+            logoutNavItem.style.display = 'none'; // Hide logout button if no user is logged in
+        }
+
+        fetchStudentAllocations(); // Initial load
+    </script>
+    <script>
+    // Logout functionality
+    const logoutBtn = document.getElementById('logoutBtn');
+    const logoutNavItem = document.getElementById('logout-nav-item');
+
+    function checkLoginStatus() {
+        const currentUser = sessionStorage.getItem('currentUser');
+        if (currentUser) {
+            logoutNavItem.style.display = 'block';
+            // For buttons, directly control opacity and visibility if they have initial hidden styles
+            logoutBtn.style.opacity = '1';
+            logoutBtn.style.visibility = 'visible';
+        } else {
+            logoutNavItem.style.display = 'none';
+            logoutBtn.style.opacity = '0';
+            logoutBtn.style.visibility = 'hidden';
+        }
+    }
+
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+        sessionStorage.removeItem('currentUser');
+        sessionStorage.removeItem('currentTeacherId'); // Clear teacher specific storage
+        sessionStorage.removeItem('currentTeacherName'); // Clear teacher specific storage
+        sessionStorage.removeItem('currentStudentId'); // Clear student specific storage
+        sessionStorage.removeItem('currentStudentName'); // Clear student specific storage
+        window.location.href = '/register'; // Redirect to register page
+      });
+    }
+
+    // Initial check and check on navigation
+    checkLoginStatus();
+    window.addEventListener('storage', checkLoginStatus); // Listen for changes in other tabs
+</script>
+</body>
+</html>

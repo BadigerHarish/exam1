@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Allocations - Exam Hall Management System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        header {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            color: white;
+            padding: 0;
+            position: sticky;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        nav ul {
+            list-style: none;
+            padding: 0;
+            text-align: center;
+            margin: 0;
+            display: flex;
+            justify-content: space-between; /* Changed to space-between */
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2px;
+        }
+        nav ul li {
+            position: relative;
+        }
+        nav ul li a {
+            color: #e2e8f0;
+            text-decoration: none;
+            padding: 16px 20px;
+            display: block;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            position: relative;
+            border-radius: 8px;
+            margin: 4px;
+        }
+        nav ul li a::before {
+            content: '';
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%) scaleX(0);
+            width: 60%;
+            height: 2px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            transition: transform 0.3s ease;
+        }
+        nav ul li a:hover {
+            background: rgba(59, 130, 246, 0.1);
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+        nav ul li a:hover::before {
+            transform: translateX(-50%) scaleX(1);
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            min-width: 200px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            z-index: 1001;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            border-radius: 12px;
+            overflow: hidden;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-top: 8px;
+        }
+        .dropdown-content a {
+            color: #1e293b;
+            padding: 14px 20px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            position: relative;
+            border-left: 3px solid transparent;
+        }
+        .dropdown-content a:hover {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+            color: #3b82f6;
+            border-left-color: #3b82f6;
+            padding-left: 24px;
+        }
+        .dropdown:hover .dropdown-content {
+            display: block;
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        main {
+            padding: 40px 20px 60px;
+            text-align: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: clamp(2rem, 4vw, 2.5rem);
+            margin-bottom: 25px;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            font-weight: 700;
+        }
+        #msg {
+            max-width: 600px;
+            margin: 0 auto 20px;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-weight: 500;
+            text-align: center;
+            display: none;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }
+        .message-box.success {
+            background: linear-gradient(135deg, #06ffa5 0%, #06d6a0 100%);
+            color: #065f46;
+            border: 1px solid #06ffa5;
+        }
+        .message-box.error {
+            background: linear-gradient(135deg, #ff006e 0%, #e63946 100%);
+            color: white;
+            border: 1px solid #ff006e;
+        }
+        form {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            text-align: left;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        form::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #ff006e, #8338ec, #3a86ff, #06ffa5, #ffbe0b);
+            background-size: 200% 100%;
+            animation: gradientShift 3s ease infinite;
+        }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        form label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 14px;
+        }
+        form select,
+        form input[type="number"] {
+            width: 100%;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        form select:focus,
+        form input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+            transform: translateY(-2px);
+        }
+        #student-details,
+        #room-details {
+            margin-bottom: 20px;
+            text-align: left;
+            background: rgba(102, 126, 234, 0.08);
+            border: 1px dashed rgba(102, 126, 234, 0.4);
+            border-radius: 12px;
+            padding: 16px;
+        }
+        #student-details p,
+        #room-details p {
+            margin: 6px 0;
+            color: #475569;
+            font-size: 14px;
+        }
+        form button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px 32px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px rgba(118, 75, 162, 0.4);
+        }
+        form button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 16px 35px rgba(118, 75, 162, 0.55);
+        }
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                gap: 0;
+            }
+            nav ul li {
+                width: 100%;
+            }
+            nav ul li a {
+                border-radius: 0;
+                margin: 0;
+            }
+            .dropdown-content {
+                position: static;
+                transform: none;
+                width: 100%;
+                margin-top: 0;
+                border-radius: 0;
+            }
+            .dropdown:hover .dropdown-content {
+                transform: none;
+            }
+            form {
+                padding: 30px 20px;
+            }
+        }
+    .logout-btn {
+      background: linear-gradient(135deg, #ff006e 0%, #e63946 100%);
+      box-shadow: 0 4px 12px rgba(255, 0, 110, 0.3);
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      color: white;
+      min-width: 100px;
+    }
+    .logout-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(255, 0, 110, 0.45);
+    }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="/home">Home</a></li>
+                <li><a href="/dashboard">Dashboard</a></li>
+                <li class="dropdown">
+                    <a href="#">Exams</a>
+                    <div class="dropdown-content">
+                        <a href="/add-exam">Add Exam</a>
+                        <a href="/view-exam">View Exams</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#">Rooms</a>
+                    <div class="dropdown-content">
+                        <a href="/add-room">Add Room</a>
+                        <a href="/view-room">View Rooms</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#">Subjects</a>
+                    <div class="dropdown-content">
+                        <a href="/add-subject">Add Subject</a>
+                        <a href="/view-subject">View Subjects</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#">Teachers</a>
+                    <div class="dropdown-content">
+                        <a href="/add-teacher">Add Teacher</a>
+                        <a href="/view-teacher">View Teachers</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#">Allocations</a>
+                    <div class="dropdown-content">
+                        <a href="/add-allocations">Add Room Allocation</a>
+                        <a href="/view-allocations">View Room Allocations</a>
+                        <a href="/student-allocations">Add Student Allocation</a>
+                        <a href="/view-student-allocations">View Student Allocations</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#">Students</a>
+                    <div class="dropdown-content">
+                        <a href="/add-student">Add Student</a>
+                        <a href="/view-student">View Students</a>
+                    </div>
+                </li>
+                <li id="logout-nav-item" style="margin-left: auto; display: none;">
+                  <button id="logoutBtn" class="logout-btn">Logout</button>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h1>Student Allocations</h1>
+        <div id="msg" class="message-box"></div>
+
+        <form id="studentAllocationForm">
+            <label for="student-select">Student:</label>
+            <select id="student-select" required>
+                <option value="">Select a student</option>
+            </select>
+
+            <div id="student-details" style="margin-bottom: 20px; text-align: left;">
+                <p><strong>Student ID:</strong> <span id="student-id-display"></span></p>
+                <p><strong>Semester:</strong> <span id="student-semester-display"></span></p>
+                <p><strong>Branch:</strong> <span id="student-branch-display"></span></p>
+                <p><strong>Course:</strong> <span id="student-course-display"></span></p>
+            </div>
+
+            <label for="room-select">Room:</label>
+            <select id="room-select" required>
+                <option value="">Select a room</option>
+            </select>
+
+            <div id="room-details" style="margin-bottom: 20px; text-align: left;">
+                <p><strong>Floor:</strong> <span id="room-floor-display"></span></p>
+            </div>
+
+            <label for="seat-number">Seat Number:</label>
+            <input type="number" id="seat-number" placeholder="Enter seat number" required>
+
+            <button type="submit">Allocate Student</button>
+        </form>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const studentSelect = document.getElementById('student-select');
+            const roomSelect = document.getElementById('room-select');
+            const allocationForm = document.getElementById('studentAllocationForm');
+            const msgDiv = document.getElementById('msg');
+
+            const API_BASE_URL = 'http://127.0.0.1:5000'; // Your Flask backend URL
+
+            function showMessage(type, message) {
+                msgDiv.className = `message-box ${type}`;
+                msgDiv.innerHTML = message;
+                msgDiv.style.display = 'block';
+                msgDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                setTimeout(() => msgDiv.style.display = 'none', 3000);
+            }
+
+            async function fetchAndPopulateDropdowns() {
+                try {
+                    // Fetch Students
+                    let response = await fetch(`${API_BASE_URL}/students`);
+                    if (!response.ok) throw new Error('Failed to fetch students');
+                    const studentsData = await response.json();
+                    studentSelect.innerHTML = '<option value="">Select a student</option>';
+                    studentsData.forEach(student => {
+                        const option = document.createElement('option');
+                        option.value = JSON.stringify(student); // Store entire student object
+                        option.textContent = `${student.name} (${student.id})`; // Using 'name' and 'id'
+                        studentSelect.appendChild(option);
+                    });
+
+                    // Fetch Rooms
+                    response = await fetch(`${API_BASE_URL}/rooms`);
+                    if (!response.ok) throw new Error('Failed to fetch rooms');
+                    const roomsData = await response.json();
+                    roomSelect.innerHTML = '<option value="">Select a room</option>';
+                    roomsData.forEach(room => {
+                        const option = document.createElement('option');
+                        option.value = JSON.stringify(room); // Store entire room object
+                        option.textContent = `${room.name} (Floor: ${room.floor})`;
+                        roomSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error("Error populating dropdowns:", error);
+                    showMessage('error', '❌ Failed to load data for dropdowns.');
+                }
+            }
+
+            // Display selected student details
+            studentSelect.addEventListener('change', () => {
+                const selectedStudentString = studentSelect.value;
+                if (selectedStudentString) {
+                    const selectedStudent = JSON.parse(selectedStudentString);
+                    document.getElementById('student-id-display').textContent = selectedStudent.id || '-';
+                    // Assuming semester, branch, course are part of student object or derived
+                    document.getElementById('student-semester-display').textContent = selectedStudent.semester || '-'; 
+                    document.getElementById('student-branch-display').textContent = selectedStudent.branch || '-';
+                    document.getElementById('student-course-display').textContent = selectedStudent.course || '-';
+                } else {
+                    document.querySelectorAll('#student-details span').forEach(span => span.textContent = '');
+                }
+            });
+
+            // Display selected room details
+            roomSelect.addEventListener('change', () => {
+                const selectedRoomString = roomSelect.value;
+                if (selectedRoomString) {
+                    const selectedRoom = JSON.parse(selectedRoomString);
+                    document.getElementById('room-floor-display').textContent = selectedRoom.floor || '-';
+                } else {
+                    document.querySelectorAll('#room-details span').forEach(span => span.textContent = '');
+                }
+            });
+
+            // Form Submission
+            allocationForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                msgDiv.style.display = 'none';
+
+                const selectedStudent = studentSelect.value ? JSON.parse(studentSelect.value) : null;
+                const selectedRoom = roomSelect.value ? JSON.parse(roomSelect.value) : null;
+                const seatNumber = document.getElementById('seat-number').value;
+
+                if (!selectedStudent || !selectedRoom) {
+                    showMessage('error', '⚠️ Please select both a student and a room!');
+                    return;
+                }
+
+                const newStudentAllocation = {
+                    student_id: selectedStudent.id,
+                    student_name: selectedStudent.name,
+                    student_semester: selectedStudent.semester, // Assuming these are part of student object
+                    student_branch: selectedStudent.branch,
+                    student_course: selectedStudent.course,
+                    room_name: selectedRoom.name,
+                    room_floor: selectedRoom.floor,
+                    seat_number: seatNumber
+                };
+
+                try {
+                    const response = await fetch(`${API_BASE_URL}/student_allocations`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(newStudentAllocation)
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        showMessage('success', `✅ ${result.message} Redirecting...`);
+                        allocationForm.reset();
+                        document.querySelectorAll('#student-details span').forEach(span => span.textContent = '');
+                        document.querySelectorAll('#room-details span').forEach(span => span.textContent = '');
+                        setTimeout(() => {
+                            window.location.href = '/view-student-allocations'; // Changed to Flask route
+                        }, 1500);
+                    } else {
+                        showMessage('error', `❌ ${result.message || 'Failed to add student allocation.'}`);
+                    }
+                } catch (error) {
+                    console.error("Error adding student allocation:", error);
+                    showMessage('error', 'An error occurred. Please try again.');
+                }
+            });
+
+            fetchAndPopulateDropdowns(); // Initial load for dropdowns
+
+            const logoutBtn = document.getElementById('logoutBtn');
+            const logoutNavItem = document.getElementById('logout-nav-item');
+
+            function checkLoginStatus() {
+                const currentUser = sessionStorage.getItem('currentUser');
+                if (currentUser) {
+                    logoutNavItem.style.display = 'block';
+                    logoutBtn.style.opacity = '1';
+                    logoutBtn.style.visibility = 'visible';
+                } else {
+                    logoutNavItem.style.display = 'none';
+                    logoutBtn.style.opacity = '0';
+                    logoutBtn.style.visibility = 'hidden';
+                }
+            }
+
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                    sessionStorage.removeItem('currentUser');
+                    sessionStorage.removeItem('currentTeacherId');
+                    sessionStorage.removeItem('currentTeacherName');
+                    sessionStorage.removeItem('currentStudentId');
+                    sessionStorage.removeItem('currentStudentName');
+                    window.location.href = '/register';
+                });
+            }
+
+            checkLoginStatus();
+            window.addEventListener('storage', checkLoginStatus);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #0f172a;
+      color: white;
+      margin: 0;
+      padding: 0;
+    }
+
+    nav {
+      background-color: #1e293b;
+      padding: 15px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    nav h1 {
+      font-size: 20px;
+      color: #38bdf8;
+    }
+
+    .container {
+      max-width: 450px;
+      background: #1e293b;
+      margin: 40px auto;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px #38bdf8;
+    }
+
+    select, input, button {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+    }
+
+    select, input {
+      background: #334155;
+      color: white;
+    }
+
+    button {
+      background: #38bdf8;
+      color: #0f172a;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+
+    button:hover {
+      background: #0ea5e9;
+    }
+
+    .message {
+      margin-top: 10px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <h1>Exam Hall Management</h1>
+  </nav>
+
+  <div class="container">
+    <h2>Login</h2>
+    <select id="role">
+      <option value="">Select Role</option>
+      <option value="admin">Admin</option>
+      <option value="teacher">Teacher</option>
+      <option value="student">Student</option>
+    </select>
+    <input type="text" id="id" placeholder="Enter ID">
+    <input type="password" id="password" placeholder="Enter Password">
+    <button id="loginBtn">Login</button>
+    <div class="message" id="msg"></div>
+    <p class="message">Don't have an account? <a href="/register" style="color: #38bdf8; text-decoration: none;">Register here</a> | <a href="/forgot-password" style="color: #38bdf8; text-decoration: none;">Forgot Password?</a></p>
+  </div>
+
+  <script>
+    const API_BASE_URL = 'http://127.0.0.1:5000'; // Your Flask backend URL
+
+    // No need to create demo users on frontend anymore, as backend handles it
+    document.addEventListener('DOMContentLoaded', function() {
+        // Optional: You could fetch initial data or perform other tasks here
+        // For now, removing the localStorage user creation.
+    });
+
+    // Form submission handler
+    document.getElementById('loginBtn').addEventListener('click', function(e) {
+        e.preventDefault(); // Prevent default button behavior
+        handleLogin();
+    });
+
+    async function handleLogin() {
+        const userType = document.getElementById('role').value; // Changed from 'userType' to 'role'
+        const userId = document.getElementById('id').value; // Changed from 'userId' to 'id'
+        const password = document.getElementById('password').value;
+
+        const messageDiv = document.getElementById('msg'); // Changed from 'message' to 'msg'
+        const loginBtn = document.getElementById('loginBtn');
+
+        // Basic validation
+        if (!userType || !userId || !password) {
+            showMessage('Please fill in all fields', 'error');
+            return;
+        }
+
+        loginBtn.disabled = true;
+        loginBtn.textContent = 'Logging in...';
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ userType, userId, password }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                showMessage(data.message, 'success');
+
+                // Store current user in sessionStorage
+                sessionStorage.setItem('currentUser', JSON.stringify(data.user));
+
+                // Clear localStorage entries for student/teacher home pages to ensure fresh data load
+                localStorage.removeItem('currentStudentName');
+                localStorage.removeItem('currentStudentId');
+                localStorage.removeItem('currentTeacherName');
+                localStorage.removeItem('currentTeacherId');
+
+                setTimeout(() => {
+                    let redirectPage = '/home'; // Default to admin home (now public/home.html)
+                    if (userType === 'student') {
+                        redirectPage = '/allocations/student-home';
+                    } else if (userType === 'teacher') {
+                        redirectPage = '/allocations/teacher-home';
+                    } else if (userType === 'admin') {
+                        redirectPage = '/home'; // Admin goes to home.html
+                    }
+                    window.location.href = redirectPage;
+                }, 1500);
+            } else {
+                showMessage(data.message || 'Login failed', 'error');
+            }
+        } catch (error) {
+            console.error('Error during login:', error);
+            showMessage('An error occurred. Please try again later.', 'error');
+        } finally {
+            loginBtn.disabled = false;
+            loginBtn.textContent = 'Login';
+        }
+    }
+
+    function showMessage(message, type) {
+        const messageDiv = document.getElementById('msg'); // Changed from 'message' to 'msg'
+        messageDiv.textContent = message;
+        messageDiv.className = `message ${type}`;
+        messageDiv.style.display = 'block';
+
+        // Hide message after 5 seconds for errors
+        if (type === 'error') {
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
+    }
+  </script>
+</body>
+</html>
+

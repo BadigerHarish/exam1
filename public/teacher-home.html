@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Teacher Home - Exam Hall Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 40px 20px 60px;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    .container {
+      background-color: rgba(255,255,255,0.08);
+      padding: 32px;
+      border-radius: 24px;
+      box-shadow: 0 22px 45px rgba(0,0,0,0.35);
+      text-align: center;
+      margin-top: 20px;
+      width: min(960px, 95%);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: clamp(2rem, 4vw, 2.6rem);
+      margin-bottom: 12px;
+      color: #fff;
+      text-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+    p {
+      font-size: 1.05em;
+      margin: 6px 0;
+      color: #e6eef8;
+    }
+    strong {
+      color: #a7f3d0;
+    }
+    #teacherAllocationsSection {
+      background-color: rgba(255,255,255,0.08);
+      padding: 24px;
+      border-radius: 22px;
+      margin-top: 30px;
+      width: min(1100px, 95%);
+      box-shadow: 0 20px 35px rgba(0,0,0,0.3);
+      overflow-x: auto;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    #teacherAllocationsSectionInner {
+      background: rgba(15, 23, 42, 0.45);
+      padding: 20px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+      background-color: rgba(255,255,255,0.03);
+      border-radius: 16px;
+      overflow: hidden;
+      min-width: 920px;
+    }
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      color: #e0e7ff;
+      vertical-align: middle;
+      font-size: 0.95em;
+    }
+    th {
+      background: linear-gradient(135deg, rgba(102,126,234,0.8), rgba(118,75,162,0.85));
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.85em;
+      letter-spacing: 0.6px;
+      color: #fff;
+    }
+    tr:hover td {
+      background-color: rgba(255,255,255,0.06);
+    }
+    .message {
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      display: none;
+      font-weight: 600;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .message.error {
+      background: linear-gradient(135deg, #ff006e 0%, #e63946 100%);
+      color: #fff;
+      border: 1px solid #ff006e;
+    }
+    .message.info {
+      background: rgba(59,130,246,0.15);
+      color: #dbeafe;
+      border: 1px solid rgba(59,130,246,0.4);
+    }
+    form label {
+      display:block;
+      text-align:left;
+      margin-bottom:6px;
+      color:#a7f3d0;
+      font-weight:700;
+    }
+    input[type="text"], input[type="search"] {
+      width:100%;
+      padding:12px 14px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.05);
+      color:#fff;
+      margin-bottom:12px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+    input[type="text"]:focus, input[type="search"]:focus {
+      outline:none;
+      border-color:#818cf8;
+      box-shadow:0 0 0 3px rgba(129,140,248,0.25);
+    }
+    button.primary {
+      background: linear-gradient(135deg,#4caf50,#22c55e);
+      color:#fff;
+      padding:11px 20px;
+      border-radius:12px;
+      border:none;
+      cursor:pointer;
+      font-weight:700;
+      transition:transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    button.primary:hover {
+      transform:translateY(-2px);
+      box-shadow:0 12px 25px rgba(34,197,94,0.35);
+    }
+    .controls {
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+      align-items:center;
+      margin-bottom:6px;
+      flex-wrap: wrap;
+    }
+    .loader {
+      display:inline-block;
+      width:16px;
+      height:16px;
+      border-radius:50%;
+      border:3px solid rgba(255,255,255,0.12);
+      border-top-color:#a7f3d0;
+      animation:spin 0.8s linear infinite;
+      vertical-align:middle;
+      margin-right:8px;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    @media (max-width:880px){
+      table{ min-width:720px; }
+    }
+    @media (max-width:720px){
+      .container{ margin-top:18px; padding:22px; }
+      table, thead, tbody, th, td, tr { display:block; }
+      thead tr { position: absolute; top:-9999px; left:-9999px; }
+      tr { background: rgba(255,255,255,0.06); margin-bottom:12px; padding:12px; border-radius:12px; }
+      td { border:none; padding:10px 6px; text-align:right; position:relative; }
+      td:before { content: attr(data-label); position:absolute; left:8px; width:45%; text-align:left; font-weight:700; color:#a7f3d0; }
+    }
+    .logout-btn {
+      background: linear-gradient(135deg, #ff006e 0%, #e63946 100%);
+      box-shadow: 0 4px 12px rgba(255, 0, 110, 0.3);
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      color: white;
+      min-width: 100px;
+    }
+    .logout-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(255, 0, 110, 0.45);
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="teacherInfoContainer">
+    <h1 id="welcomeMessage">Welcome, Teacher!</h1>
+
+    <p><strong>Name:</strong> <span id="teacherNameDisplay">—</span></p>
+    <p><strong>Teacher ID:</strong> <span id="teacherIdDisplay">—</span></p>
+
+    <p id="loginPrompt" style="margin-top:8px;color:#ffdede;">Please log in to view your allocations.</p>
+
+    <form id="teacherLoginForm" style="margin-top:12px; max-width:640px; margin-left:auto; margin-right:auto;">
+      <label for="teacherName">Teacher Name</label>
+      <input id="teacherName" name="teacherName" type="text" placeholder="Enter your name" required />
+
+      <label for="teacherId">Teacher ID</label>
+      <input id="teacherId" name="teacherId" type="text" placeholder="Enter your teacher id" required />
+
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:6px;">
+        <button id="submitBtn" class="primary" type="submit">Submit</button>
+        
+        <button id="logoutBtn" type="button" class="logout-btn" style="display:none;">Logout</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="teacherAllocationsSection" style="display:none; width:94%; max-width:1100px;">
+    <div class="message info" id="allocationsMessage">Loading allocations...</div>
+
+    <div id="teacherAllocationsSectionInner" style="background:rgba(255,255,255,0.04); padding:16px; border-radius:10px; margin-top:18px;">
+      <h2 style="margin:0 0 8px 0; color:#fff;">Your Room Allocations</h2>
+
+      <div class="controls" style="margin-bottom:8px;">
+        <div id="statusText" style="color:#dbeafe;font-weight:600"></div>
+        <div style="flex:1"></div>
+        <input id="searchInput" placeholder="Search by subject / course / room" type="search" style="max-width:320px;" />
+        <button id="refreshBtn" class="primary" style="margin-left:8px;">Refresh</button>
+      </div>
+
+      <div style="overflow:auto;">
+        <table aria-live="polite">
+          <thead>
+            <tr>
+              <th>Exam Date</th>
+              <th>Subject</th>
+              <th>Branch</th>
+              <th>Course</th>
+              <th>Semester</th>
+              <th>Room</th>
+              <th>Floor</th>
+              <th>Teacher ID</th>
+              <th>Teacher Name</th>
+              <th>Start Time</th>
+              <th>End Time</th>
+            </tr>
+          </thead>
+          <tbody id="teacherAllocationsTableBody">
+            <tr><td colspan="11" style="padding:18px;text-align:center;">No allocations yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p id="no-allocations-msg" style="display:none;margin-top:12px;color:#fca5a5;"></p>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      // Backend base URL (set to the same backend URL you used previously)
+      const API_BASE_URL = 'http://127.0.0.1:5000';
+
+      const teacherLoginForm = document.getElementById('teacherLoginForm');
+      const teacherNameInput = document.getElementById('teacherName');
+      const teacherIdInput = document.getElementById('teacherId');
+      const teacherNameDisplay = document.getElementById('teacherNameDisplay');
+      const teacherIdDisplay = document.getElementById('teacherIdDisplay');
+      const welcomeMessage = document.getElementById('welcomeMessage');
+      const loginPrompt = document.getElementById('loginPrompt');
+      const teacherAllocationsSection = document.getElementById('teacherAllocationsSection');
+      const allocationsMessage = document.getElementById('allocationsMessage');
+      const allocationsTableBody = document.getElementById('teacherAllocationsTableBody');
+      const noAllocationsMsg = document.getElementById('no-allocations-msg');
+      const searchInput = document.getElementById('searchInput');
+      const refreshBtn = document.getElementById('refreshBtn');
+      const submitBtn = document.getElementById('submitBtn');
+      const clearBtn = document.getElementById('clearBtn');
+      const statusText = document.getElementById('statusText');
+      const logoutBtn = document.getElementById('logoutBtn');
+
+      let currentTeacherId = null;
+      let currentTeacherName = null;
+      let allAllocations = [];
+
+      function getQueryParam(param) {
+        return new URLSearchParams(window.location.search).get(param);
+      }
+
+      function showMessage(type, text, timeout = 3000) {
+        allocationsMessage.className = 'message ' + (type === 'error' ? 'error' : 'info');
+        allocationsMessage.textContent = text;
+        allocationsMessage.style.display = 'block';
+        if (timeout) setTimeout(() => allocationsMessage.style.display = 'none', timeout);
+      }
+
+      function formatDate(dateStr) {
+        if (!dateStr) return '-';
+        const d = new Date(dateStr);
+        if (isNaN(d)) return dateStr;
+        return d.toLocaleDateString();
+      }
+
+      function formatTime(timeStr) {
+        if (!timeStr) return '-';
+        if (/^\d{2}:\d{2}$/.test(timeStr)) {
+          try {
+            const dt = new Date('1970-01-01T' + timeStr + ':00');
+            return dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          } catch (e) {}
+        }
+        return timeStr;
+      }
+
+      function escapeHtml(s) {
+        if (s === null || s === undefined) return '';
+        return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+      }
+
+      async function fetchAllocationsForTeacher(teacherId) {
+        showMessage('info', 'Loading allocations...');
+        statusText.innerHTML = '<span class="loader"></span>Fetching...';
+        allocationsTableBody.innerHTML = `<tr><td colspan="11" style="padding:18px;text-align:center;"><span class="loader"></span> Loading allocations...</td></tr>`;
+        noAllocationsMsg.style.display = 'none';
+
+        // Try teacher-specific endpoint first
+        try {
+          const resp = await fetch(`${API_BASE_URL}/allocations/teacher/${encodeURIComponent(teacherId)}`);
+          if (resp.ok) {
+            const data = await resp.json();
+            allAllocations = Array.isArray(data) ? data : [];
+            renderAllocations(allAllocations);
+            showMessage('info', 'Allocations loaded.', 1600);
+            statusText.textContent = `Showing ${allAllocations.length} allocation(s)`;
+            return;
+          }
+          // If not found (404/other), fall through to fetch all and filter
+        } catch (err) {
+          console.warn('teacher endpoint fetch failed, trying fallback /allocations', err);
+        }
+
+        // Fallback: fetch all allocations and filter by teacher id
+        try {
+          const resp2 = await fetch(`${API_BASE_URL}/allocations`);
+          if (!resp2.ok) throw new Error('Failed to fetch allocations list');
+          const data2 = await resp2.json();
+          const arr = Array.isArray(data2) ? data2 : [];
+          allAllocations = arr.filter(a => {
+            const tid = a.teacher_id || a.teacherId || a.teacher || a.teacher_id_str || a._teacherId || '';
+            return tid && tid.toString() === teacherId.toString();
+          });
+          renderAllocations(allAllocations);
+          showMessage('info', 'Allocations loaded (fallback).', 1600);
+          statusText.textContent = `Showing ${allAllocations.length} allocation(s)`;
+        } catch (err) {
+          console.error(err);
+          allocationsTableBody.innerHTML = `<tr><td colspan="11" style="padding:18px;text-align:center;">Failed to load allocations.</td></tr>`;
+          showMessage('error', 'Failed to load allocations. Check backend URL or network.');
+          statusText.textContent = 'Error loading allocations';
+        }
+      }
+
+      function renderAllocations(list) {
+        allocationsTableBody.innerHTML = '';
+        if (!list || list.length === 0) {
+          allocationsTableBody.innerHTML = `<tr><td colspan="11" style="padding:18px;text-align:center;color:#fca5a5;">No allocations found for this teacher.</td></tr>`;
+          noAllocationsMsg.style.display = 'block';
+          noAllocationsMsg.textContent = 'No allocations found for this teacher.';
+          return;
+        }
+        noAllocationsMsg.style.display = 'none';
+        list.forEach(allocation => {
+          const examDate = formatDate(allocation.exam_date || allocation.examDate || '');
+          const subject = escapeHtml(allocation.subject || '-');
+          const branch = escapeHtml(allocation.branch || '-');
+          const course = escapeHtml(allocation.course || '-');
+          const semester = escapeHtml(allocation.semester || '-');
+          const room = escapeHtml(allocation.room ?? allocation.room_no ?? '-');
+
+          // Use nullish coalescing (??) so 0 is shown correctly
+          const floorValRaw = allocation.floor ?? allocation.floor_no ?? allocation.floor_no_str ?? null;
+          const floor = floorValRaw !== null && floorValRaw !== undefined ? escapeHtml(floorValRaw) : '-';
+
+          const startTime = formatTime(allocation.startTime || allocation.start_time || '-');
+          const endTime = formatTime(allocation.endTime || allocation.end_time || '-');
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td data-label="Exam Date">${examDate}</td>
+            <td data-label="Subject">${subject}</td>
+            <td data-label="Branch">${branch}</td>
+            <td data-label="Course">${course}</td>
+            <td data-label="Semester">${semester}</td>
+            <td data-label="Room">${room}</td>
+            <td data-label="Floor">${floor}</td>
+            <td data-label="Teacher ID">${escapeHtml(currentTeacherId)}</td>
+            <td data-label="Teacher Name">${escapeHtml(currentTeacherName)}</td>
+            <td data-label="Start Time">${startTime}</td>
+            <td data-label="End Time">${endTime}</td>
+          `;
+          allocationsTableBody.appendChild(tr);
+        });
+      }
+
+      // Search filter (client-side)
+      searchInput.addEventListener('input', () => {
+        const q = (searchInput.value || '').trim().toLowerCase();
+        if (!q) { renderAllocations(allAllocations); statusText.textContent = `Showing ${allAllocations.length} allocation(s)`; return; }
+        const filtered = allAllocations.filter(a => {
+          return (a.subject || '').toString().toLowerCase().includes(q)
+            || (a.course || '').toString().toLowerCase().includes(q)
+            || (a.room || '').toString().toLowerCase().includes(q)
+            || (a.branch || '').toString().toLowerCase().includes(q)
+            || (String(a.floor ?? '')).toLowerCase().includes(q);
+        });
+        renderAllocations(filtered);
+        statusText.textContent = `Filtered: ${filtered.length} / ${allAllocations.length}`;
+      });
+
+      refreshBtn.addEventListener('click', () => {
+        if (currentTeacherId) fetchAllocationsForTeacher(currentTeacherId);
+      });
+
+      teacherLoginForm.addEventListener('submit', (ev) => {
+        ev.preventDefault();
+        const name = teacherNameInput.value && teacherNameInput.value.trim();
+        const id = teacherIdInput.value && teacherIdInput.value.trim();
+        if (!name || !id) {
+          loginPrompt.textContent = 'Please enter both teacher name and ID.';
+          loginPrompt.style.color = '#ffc3c3';
+          return;
+        }
+        // save to session storage
+        sessionStorage.setItem('currentTeacherId', id);
+        sessionStorage.setItem('currentTeacherName', name);
+        initializeForTeacher(id, name);
+        logoutBtn.style.display = 'inline-block'; // Show logout button on successful login
+      });
+
+      clearBtn.addEventListener('click', () => {
+        sessionStorage.removeItem('currentTeacherId');
+        sessionStorage.removeItem('currentTeacherName');
+        teacherNameInput.value = '';
+        teacherIdInput.value = '';
+        teacherNameDisplay.textContent = '—';
+        teacherIdDisplay.textContent = '—';
+        welcomeMessage.textContent = 'Welcome, Teacher!';
+        teacherAllocationsSection.style.display = 'none';
+        loginPrompt.style.display = 'block';
+        logoutBtn.style.display = 'none'; // Hide logout button on clear
+      });
+
+      logoutBtn.addEventListener('click', () => {
+        sessionStorage.removeItem('currentTeacherId');
+        sessionStorage.removeItem('currentTeacherName');
+        window.location.href = '/register'; // Redirect to register page
+      });
+
+      async function initializeForTeacher(id, name) {
+        currentTeacherId = id;
+        currentTeacherName = name;
+        teacherNameDisplay.textContent = name;
+        teacherIdDisplay.textContent = id;
+        welcomeMessage.textContent = `Welcome, ${name}!`;
+        loginPrompt.style.display = 'none';
+        teacherLoginForm.style.display = 'none';
+        teacherAllocationsSection.style.display = 'block';
+        await fetchAllocationsForTeacher(id);
+        logoutBtn.style.display = 'inline-block'; // Show logout button after successful login
+      }
+
+      // on load: check sessionStorage or query param
+      (function init() {
+        const urlTeacherId = getQueryParam('teacher_id');
+        const urlTeacherName = getQueryParam('teacher_name');
+        const savedId = sessionStorage.getItem('currentTeacherId');
+        const savedName = sessionStorage.getItem('currentTeacherName');
+
+        if (urlTeacherId) {
+          const id = urlTeacherId;
+          const name = urlTeacherName || savedName || urlTeacherId;
+          teacherLoginForm.style.display = 'none';
+          loginPrompt.style.display = 'none';
+          initializeForTeacher(id, name);
+        } else if (savedId && savedName) {
+          teacherLoginForm.style.display = 'none';
+          loginPrompt.style.display = 'none';
+          initializeForTeacher(savedId, savedName);
+        } else {
+          teacherLoginForm.style.display = 'block';
+          teacherAllocationsSection.style.display = 'none';
+          loginPrompt.style.display = 'block';
+          loginPrompt.textContent = 'Please enter your credentials to view your allocations.';
+          teacherNameDisplay.textContent = '—';
+          teacherIdDisplay.textContent = '—';
+          logoutBtn.style.display = 'none'; // Ensure it's hidden on initial load
+        }
+      })();
+
+    })();
+  </script>
+</body>
+</html>

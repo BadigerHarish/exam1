@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Subjects - Exam Hall Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+    header {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      color: white;
+      padding: 0;
+      position: sticky;
+      top: 0;
+      width: 100%;
+      z-index: 1000;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    nav {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    nav ul {
+      list-style: none;
+      padding: 0;
+      text-align: center;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 2px;
+    }
+    nav ul li {
+      position: relative;
+    }
+    nav ul li a {
+      color: #e2e8f0;
+      text-decoration: none;
+      padding: 16px 20px;
+      display: block;
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      position: relative;
+      border-radius: 8px;
+      margin: 4px;
+    }
+    nav ul li a::before {
+      content: '';
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%) scaleX(0);
+      width: 60%;
+      height: 2px;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+      transition: transform 0.3s ease;
+    }
+    nav ul li a:hover {
+      background: rgba(59, 130, 246, 0.1);
+      color: #ffffff;
+      transform: translateY(-2px);
+    }
+    nav ul li a:hover::before {
+      transform: translateX(-50%) scaleX(1);
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      min-width: 200px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      z-index: 1001;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      border-radius: 12px;
+      overflow: hidden;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      margin-top: 8px;
+    }
+    .dropdown-content a {
+      color: #1e293b;
+      padding: 14px 20px;
+      text-decoration: none;
+      display: block;
+      text-align: left;
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      position: relative;
+      border-left: 3px solid transparent;
+    }
+    .dropdown-content a:hover {
+      background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+      color: #3b82f6;
+      border-left-color: #3b82f6;
+      padding-left: 24px;
+    }
+    .dropdown:hover .dropdown-content {
+      display: block;
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    main {
+      padding: 40px 20px;
+      text-align: center;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: clamp(2rem, 4vw, 2.5rem);
+      margin-bottom: 30px;
+      color: white;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      font-weight: 700;
+    }
+    table {
+      width: 100%;
+      margin: 20px auto;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    th, td {
+      padding: 16px;
+      text-align: center;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    th {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    tbody tr {
+      transition: all 0.3s ease;
+    }
+    tbody tr:hover {
+      background: rgba(102, 126, 234, 0.05);
+      transform: scale(1.01);
+    }
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+    td {
+      color: #1e293b;
+      font-size: 14px;
+    }
+    td button {
+      margin: 0 4px;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      font-family: 'Inter', sans-serif;
+      color: white;
+    }
+    .edit {
+      background: linear-gradient(135deg, #3a86ff 0%, #2563eb 100%);
+      box-shadow: 0 4px 12px rgba(58, 134, 255, 0.3);
+    }
+    .edit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(58, 134, 255, 0.4);
+    }
+    .delete {
+      background: linear-gradient(135deg, #ff006e 0%, #e63946 100%);
+      box-shadow: 0 4px 12px rgba(255, 0, 110, 0.3);
+    }
+    .delete:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 0, 110, 0.4);
+    }
+    .message-box {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 16px 24px;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      display: none;
+      font-weight: 500;
+      animation: slideInRight 0.3s ease;
+      max-width: 400px;
+    }
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(100px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    .message-box.success-box {
+      background: linear-gradient(135deg, #06ffa5 0%, #06d6a0 100%);
+      color: #065f46;
+      border: 1px solid #06ffa5;
+    }
+    .message-box.error-box {
+      background: linear-gradient(135deg, #ff006e 0%, #e63946 100%);
+      color: white;
+      border: 1px solid #ff006e;
+    }
+    @media (max-width: 768px) {
+      nav ul {
+        flex-direction: column;
+        gap: 0;
+      }
+      nav ul li {
+        width: 100%;
+      }
+      nav ul li a {
+        border-radius: 0;
+        margin: 0;
+      }
+      .dropdown-content {
+        position: static;
+        transform: none;
+        width: 100%;
+        margin-top: 0;
+        border-radius: 0;
+      }
+      .dropdown:hover .dropdown-content {
+        transform: none;
+      }
+      table {
+        font-size: 12px;
+      }
+      th, td {
+        padding: 10px 8px;
+      }
+      td button {
+        padding: 6px 12px;
+        font-size: 11px;
+        margin: 2px;
+      }
+      .message-box {
+        right: 10px;
+        left: 10px;
+        max-width: none;
+      }
+    }
+    .logout-btn {
+      background: linear-gradient(135deg, #ff006e 0%, #e63946 100%);
+      box-shadow: 0 4px 12px rgba(255, 0, 110, 0.3);
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      color: white;
+      min-width: 100px;
+    }
+    .logout-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(255, 0, 110, 0.45);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <ul>
+        <li><a href="/home">Home</a></li>
+        <li><a href="/dashboard">Dashboard</a></li>
+        <li class="dropdown">
+          <a href="#">Exams</a>
+          <div class="dropdown-content">
+            <a href="/add-exam">Add Exam</a>
+            <a href="/view-exam">View Exams</a>
+          </div>
+        </li>
+        <li class="dropdown">
+          <a href="#">Rooms</a>
+          <div class="dropdown-content">
+            <a href="/add-room">Add Room</a>
+            <a href="/view-room">View Rooms</a>
+          </div>
+        </li>
+        <li class="dropdown">
+          <a href="#">Subjects</a>
+          <div class="dropdown-content">
+            <a href="/add-subject">Add Subject</a>
+            <a href="/view-subject">View Subjects</a>
+          </div>
+        </li>
+        <li class="dropdown">
+          <a href="#">Teachers</a>
+          <div class="dropdown-content">
+            <a href="/add-teacher">Add Teacher</a>
+            <a href="/view-teacher">View Teachers</a>
+          </div>
+        </li>
+        <li class="dropdown">
+          <a href="#">Allocations</a>
+          <div class="dropdown-content">
+            <a href="/add-allocations">Add Room Allocation</a>
+            <a href="/view-allocations">View Room Allocations</a>
+            <a href="/student-allocations">Add Student Allocation</a>
+            <a href="/view-student-allocations">View Student Allocations</a>
+          </div>
+        </li>
+        <li class="dropdown">
+            <a href="#">Students</a>
+            <div class="dropdown-content">
+                <a href="/add-student">Add Student</a>
+                <a href="/view-student">View Students</a>
+            </div>
+        </li>
+        <li id="logout-nav-item" style="margin-left: auto; display: none;">
+          <button id="logoutBtn" class="logout-btn">Logout</button>
+        </li>
+
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Subjects List</h1>
+    <table id="subjectTable">
+      <thead>
+        <tr>
+          <th>Subject Name</th>
+          <th>Subject Code</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </main>
+
+  <script>
+    const tableBody = document.querySelector('#subjectTable tbody');
+    const messageDiv = document.createElement('div'); // Create a message div
+    messageDiv.id = 'message';
+    messageDiv.className = 'message-box'; // Using message-box classes for styling
+    document.querySelector('main').insertBefore(messageDiv, document.querySelector('#subjectTable')); // Insert before the table
+
+    const API_BASE_URL = 'http://127.0.0.1:5000'; // Your Flask backend URL
+
+    let allSubjects = []; // To store fetched subject data
+
+    function showMessage(type, message) {
+      messageDiv.className = `message-box ${type}-box`;
+      messageDiv.textContent = message;
+      messageDiv.style.display = 'block';
+      // Removed: setTimeout(() => messageDiv.style.display = 'none', 3000); // Hide after 3 seconds
+    }
+
+    async function fetchSubjects() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/subjects`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        allSubjects = await response.json();
+        console.log('Fetched subjects:', allSubjects); // Added for debugging
+        renderSubjects();
+      } catch (error) {
+        console.error("Error fetching subjects:", error);
+        showMessage('error', '❌ Failed to load subjects. Please try again later.');
+        tableBody.innerHTML = '<tr><td colspan="3" style="color: gray; text-align: center;">Failed to load subjects.</td></tr>';
+      }
+    }
+
+    function renderSubjects() {
+      tableBody.innerHTML = '';
+      if (allSubjects.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="3" style="color: gray; text-align: center;">No subjects added yet.</td></tr>';
+        return;
+      }
+
+      allSubjects.forEach(subject => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${subject.name || ''}</td>
+          <td>${subject.code || ''}</td>
+          <td>
+            <button class="edit" onclick="editSubject('${subject._id}')">Edit</button>
+            <button class="delete" onclick="deleteSubject('${subject._id}')">Delete</button>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+
+    window.deleteSubject = async (id) => {
+      if (confirm('Are you sure to delete this subject?')) {
+        try {
+          const response = await fetch(`${API_BASE_URL}/subjects/${id}`, {
+            method: 'DELETE'
+          });
+
+          const result = await response.json();
+          if (response.ok) {
+            showMessage('success', `✅ ${result.message}`);
+            fetchSubjects(); // Refresh table
+          } else {
+            showMessage('error', `❌ ${result.message || 'Failed to delete subject.'}`);
+          }
+        } catch (error) {
+          console.error("Error deleting subject:", error);
+          showMessage('error', 'An error occurred while deleting the subject.');
+        }
+      }
+    }
+
+    window.editSubject = async (id) => {
+      const subject = allSubjects.find(s => s._id === id);
+      if (!subject) {
+        showMessage('error', 'Subject not found for editing.');
+        return;
+      }
+
+      const newName = prompt('Enter new subject name:', subject.name);
+      const newCode = prompt('Enter new subject code:', subject.code);
+
+      if (!newName || !newCode) {
+        showMessage('error', '⚠️ Both subject name and code are required for editing!');
+        return;
+      }
+
+      const updatedSubjectData = {
+        name: newName.trim(),
+        code: newCode.trim()
+      };
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/subjects/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(updatedSubjectData)
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          showMessage('success', `✅ ${result.message}`);
+          fetchSubjects(); // Refresh table
+        } else {
+          showMessage('error', `❌ ${result.message || 'Failed to update subject.'}`);
+        }
+      } catch (error) {
+        console.error("Error updating subject:", error);
+        showMessage('error', 'An error occurred while updating the subject.');
+      }
+    }
+
+    fetchSubjects(); // Initial load
+
+    const logoutBtn = document.getElementById('logoutBtn');
+    const logoutNavItem = document.getElementById('logout-nav-item');
+
+    function checkLoginStatus() {
+        const currentUser = sessionStorage.getItem('currentUser');
+        if (currentUser) {
+            logoutNavItem.style.display = 'block';
+            logoutBtn.style.opacity = '1';
+            logoutBtn.style.visibility = 'visible';
+        } else {
+            logoutNavItem.style.display = 'none';
+            logoutBtn.style.opacity = '0';
+            logoutBtn.style.visibility = 'hidden';
+        }
+    }
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            sessionStorage.removeItem('currentUser');
+            sessionStorage.removeItem('currentTeacherId');
+            sessionStorage.removeItem('currentTeacherName');
+            sessionStorage.removeItem('currentStudentId');
+            sessionStorage.removeItem('currentStudentName');
+            window.location.href = '/register';
+        });
+    }
+
+    checkLoginStatus();
+    window.addEventListener('storage', checkLoginStatus);
+  </script>
+</body>
+</html>

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Home - Exam Hall Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 40px 20px 60px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      position: relative;
+    }
+    body::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top, rgba(255, 255, 255, 0.18), transparent 60%);
+      pointer-events: none;
+    }
+    .container {
+      background-color: rgba(255, 255, 255, 0.12);
+      padding: 32px;
+      border-radius: 24px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+      text-align: center;
+      margin-top: 20px;
+      width: min(900px, 95%);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      position: relative;
+      z-index: 1;
+    }
+    h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      margin-bottom: 18px;
+      color: #fff;
+      text-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    }
+    p {
+      font-size: 1.05em;
+      line-height: 1.7;
+      margin-bottom: 10px;
+      color: rgba(255, 255, 255, 0.92);
+    }
+    strong {
+      color: #a7f3d0;
+    }
+    #studentAllocationsSection {
+      background-color: rgba(255, 255, 255, 0.12);
+      padding: 24px;
+      border-radius: 20px;
+      margin-top: 35px;
+      width: min(1100px, 95%);
+      box-shadow: 0 18px 35px rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      overflow-x: auto;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: rgba(15, 23, 42, 0.35);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      color: #e0e7ff;
+      font-size: 0.95em;
+    }
+    th {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.9), rgba(118, 75, 162, 0.9));
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+    tr:hover {
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+    #no-allocations-msg {
+      margin-top: 20px;
+      font-size: 1.05em;
+      color: rgba(255, 255, 255, 0.85);
+    }
+    .message {
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      font-weight: 600;
+      display: none;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.12);
+      color: #fee2e2;
+    }
+    .message.error {
+      background: linear-gradient(135deg, #ff006e 0%, #e63946 100%);
+      border-color: #ff006e;
+      color: #fff;
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 25px;
+      padding: 14px 28px;
+      background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+      color: #1e1b4b;
+      font-size: 1em;
+      border-radius: 999px;
+      text-decoration: none;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 15px 30px rgba(250, 208, 196, 0.45);
+      font-weight: 600;
+    }
+    .btn:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 40px rgba(250, 208, 196, 0.6);
+    }
+    @media screen and (max-width: 768px) {
+      body {
+        padding: 30px 15px 50px;
+      }
+      .container, #studentAllocationsSection {
+        width: 100%;
+        padding: 24px 18px;
+      }
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+      }
+      tr {
+        margin-bottom: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        background-color: rgba(255, 255, 255, 0.08);
+      }
+      td {
+        border: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        position: relative;
+        padding-left: 50%;
+        text-align: right;
+      }
+      td:before {
+        position: absolute;
+        top: 0;
+        left: 6px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: 600;
+        color: #a7f3d0;
+        content: attr(data-label);
+      }
+    }
+    .logout-btn {
+      background: linear-gradient(135deg, #ff006e 0%, #e63946 100%);
+      box-shadow: 0 4px 12px rgba(255, 0, 110, 0.3);
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      color: white;
+      min-width: 100px;
+    }
+    .logout-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(255, 0, 110, 0.45);
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="studentInfoContainer">
+    <h1 id="welcomeMessage">Welcome, Student!</h1>
+    <p><strong>Name:</strong> <span id="studentNameDisplay"></span></p>
+    <p><strong>Student ID:</strong> <span id="studentIdDisplay"></span></p>
+    <p class="student-photo-container"><strong>Photo:</strong> <img id="studentPhotoDisplay" src="" alt="Student Photo" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-top: 10px; display: none;"></p>
+    <p id="loginPrompt" style="display: none;">Please log in to view your allocations.</p>
+
+    <form id="studentLoginForm" style="margin-top: 20px;">
+      <div style="margin-bottom: 15px;">
+        <label for="studentName" style="display: block; margin-bottom: 5px; font-weight: bold;">Student Name:</label>
+        <input type="text" id="studentName" name="studentName" required 
+               style="width: calc(100% - 22px); padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color: rgba(255, 255, 255, 0.8); color: #333;">
+      </div>
+      <div style="margin-bottom: 15px;">
+        <label for="studentId" style="display: block; margin-bottom: 5px; font-weight: bold;">Student ID:</label>
+        <input type="text" id="studentId" name="studentId" required 
+               style="width: calc(100% - 22px); padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color: rgba(255, 255, 255, 0.8); color: #333;">
+      </div>
+      <button type="submit" 
+              style="background-color: #28a745; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; transition: background-color 0.3s ease;">
+        Submit
+      </button>
+      <button id="logoutBtn" type="button" 
+              style="background-color: #dc3545; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; margin-left: 10px; display: none; transition: background-color 0.3s ease;">
+        Logout
+      </button>
+    </form>
+  </div>
+
+  <div id="studentAllocationsSection" style="display: none; margin-top: 30px;">
+    <h1>My Allocations</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Student Name</th>
+          <th>Student ID</th>
+          <th>Semester</th>
+          <th>Branch</th>
+          <th>Course</th>
+          <th>Room Name</th>
+          <th>Room Floor</th>
+          <th>Seat Number</th>
+        </tr>
+      </thead>
+      <tbody id="studentAllocationsTableBody"></tbody>
+    </table>
+    <p id="no-allocations-msg" style="display: none;">No allocations found for your ID.</p>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const studentAllocationsSection = document.getElementById('studentAllocationsSection');
+      const studentAllocationsTableBody = document.getElementById('studentAllocationsTableBody');
+      const noAllocationsMsg = document.getElementById('no-allocations-msg');
+      const welcomeMessage = document.getElementById('welcomeMessage');
+      const studentNameDisplay = document.getElementById('studentNameDisplay');
+      const studentIdDisplay = document.getElementById('studentIdDisplay');
+      const loginPrompt = document.getElementById('loginPrompt');
+      const studentInfoContainer = document.getElementById('studentInfoContainer');
+      const studentPhotoDisplay = document.getElementById('studentPhotoDisplay');
+      const logoutBtn = document.getElementById('logoutBtn');
+
+      const API_BASE_URL = 'http://127.0.0.1:5000'; // Your Flask backend URL
+
+      function showMessage(element, type, message) {
+        // A simple way to display messages, can be enhanced
+        element.textContent = message;
+        element.style.color = (type === 'error') ? 'red' : 'green';
+        element.style.display = 'block';
+        setTimeout(() => element.style.display = 'none', 3000);
+      }
+
+      async function displayStudentAllocations(studentId) {
+        try {
+          // Fetch all student allocations and filter on frontend
+          const response = await fetch(`${API_BASE_URL}/student_allocations`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const allStudentAllocations = await response.json();
+
+          const filteredAllocations = allStudentAllocations.filter(allocation => allocation.student_id === studentId);
+
+          studentAllocationsTableBody.innerHTML = ''; // Clear previous results
+          if (filteredAllocations.length === 0) {
+            noAllocationsMsg.style.display = 'block';
+            studentAllocationsTableBody.innerHTML = '<tr><td colspan="8">No allocations found for your ID.</td></tr>';
+          } else {
+            noAllocationsMsg.style.display = 'none';
+            filteredAllocations.forEach(a => {
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td data-label="Student Name">${a.student_name || '-'}</td>
+                <td data-label="Student ID">${a.student_id || '-'}</td>
+                <td data-label="Semester">${a.student_semester || '-'}</td>
+                <td data-label="Branch">${a.student_branch || '-'}</td>
+                <td data-label="Course">${a.student_course || '-'}</td>
+                <td data-label="Room Name">${a.room_name || '-'}</td>
+                <td data-label="Room Floor">${a.room_floor || '-'}</td>
+                <td data-label="Seat Number">${a.seat_number || '-'}</td>
+              `;
+              studentAllocationsTableBody.appendChild(row);
+            });
+          }
+          studentAllocationsSection.style.display = 'block';
+        } catch (error) {
+          console.error("Error fetching student allocations:", error);
+          showMessage(noAllocationsMsg, 'error', '❌ Failed to load your allocations.');
+          studentAllocationsSection.style.display = 'block';
+        }
+      }
+
+      // Check for logged-in user from sessionStorage
+      const currentUserString = sessionStorage.getItem('currentUser');
+      if (currentUserString) {
+        const currentUser = JSON.parse(currentUserString);
+        if (currentUser.type === 'student') {
+          welcomeMessage.textContent = `Welcome, ${currentUser.name}!`;
+          studentNameDisplay.textContent = currentUser.name;
+          studentIdDisplay.textContent = currentUser.id;
+          if (currentUser.photo) {
+            studentPhotoDisplay.src = currentUser.photo;
+            studentPhotoDisplay.style.display = 'block';
+          } else {
+            studentPhotoDisplay.style.display = 'none';
+          }
+          displayStudentAllocations(currentUser.id);
+          loginPrompt.style.display = 'none';
+          studentLoginForm.style.display = 'none';
+          logoutBtn.style.display = 'inline-block'; // Show logout button
+        } else {
+          welcomeMessage.textContent = 'Access Denied';
+          studentNameDisplay.textContent = '';
+          studentIdDisplay.textContent = '';
+          loginPrompt.textContent = 'You must log in as a student to view this page.';
+          loginPrompt.style.display = 'block';
+          studentAllocationsSection.style.display = 'none';
+          studentLoginForm.style.display = 'block';
+          logoutBtn.style.display = 'none'; // Hide logout button
+        }
+      } else {
+        welcomeMessage.textContent = 'Hello!';
+        studentNameDisplay.textContent = '';
+        studentIdDisplay.textContent = '';
+        loginPrompt.textContent = 'Please log in to view your allocations.';
+        loginPrompt.style.display = 'block';
+        studentAllocationsSection.style.display = 'none';
+        studentLoginForm.style.display = 'block'; // Show login form
+        logoutBtn.style.display = 'none'; // Hide logout button
+      }
+
+      // Handle student login form submission
+      const studentLoginForm = document.getElementById('studentLoginForm');
+      if (studentLoginForm) {
+        studentLoginForm.addEventListener('submit', async (event) => {
+          event.preventDefault(); // Prevent default form submission
+
+          const studentName = document.getElementById('studentName').value;
+          const studentId = document.getElementById('studentId').value;
+
+          if (studentName && studentId) {
+            // Fetch full student details from the backend
+            try {
+              const studentResponse = await fetch(`${API_BASE_URL}/students/${studentId}`);
+              if (!studentResponse.ok) {
+                throw new Error(`Failed to fetch student details: ${studentResponse.status}`);
+              }
+              const studentData = await studentResponse.json();
+
+              const currentUser = {
+                name: studentData.name || studentName,
+                id: studentData.id || studentId,
+                type: 'student',
+                photo: studentData.photo || '' // Include photo from fetched data
+              };
+              sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+              
+              welcomeMessage.textContent = `Welcome, ${currentUser.name}!`;
+              studentNameDisplay.textContent = currentUser.name;
+              studentIdDisplay.textContent = currentUser.id;
+              if (currentUser.photo) {
+                studentPhotoDisplay.src = currentUser.photo;
+                studentPhotoDisplay.style.display = 'block';
+              } else {
+                studentPhotoDisplay.style.display = 'none';
+              }
+              loginPrompt.style.display = 'none';
+              studentLoginForm.style.display = 'none'; // Hide login form on successful login
+              logoutBtn.style.display = 'inline-block'; // Show logout button on successful login
+              displayStudentAllocations(currentUser.id);
+            } catch (error) {
+              console.error('Error during student login/fetch:', error);
+              alert('Failed to retrieve student details. Please try again.');
+              studentPhotoDisplay.style.display = 'none';
+            }
+          } else {
+            alert('Please enter both Student Name and Student ID.');
+          }
+        });
+      }
+
+      // Handle logout button click
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+          sessionStorage.removeItem('currentUser');
+          window.location.href = '/register'; // Redirect to register page
+        });
+      }
+    });
+  </script>
+</body>
+</html>

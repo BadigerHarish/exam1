@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #0f172a;
+      color: white;
+      margin: 0;
+      padding: 0;
+    }
+
+    nav {
+      background-color: #1e293b;
+      padding: 15px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    nav h1 {
+      font-size: 20px;
+      color: #38bdf8;
+    }
+
+    .container {
+      max-width: 450px;
+      background: #1e293b;
+      margin: 40px auto;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px #38bdf8;
+    }
+
+    select, input, button {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+    }
+
+    select, input {
+      background: #334155;
+      color: white;
+    }
+
+    button {
+      background: #38bdf8;
+      color: #0f172a;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+
+    button:hover {
+      background: #0ea5e9;
+    }
+
+    .message {
+      margin-top: 10px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <h1>Exam Hall Management</h1>
+  </nav>
+
+  <div class="container">
+    <h2>Register</h2>
+    <select id="role">
+      <option value="">Select Role</option>
+      <option value="admin">Admin</option>
+      <option value="teacher">Teacher</option>
+      <option value="student">Student</option>
+    </select>
+
+    <div id="form-section"></div>
+
+    <div class="message" id="msg"></div>
+    <p class="message">Already registered? <a href="/login" style="color: #38bdf8; text-decoration: none;">Login here</a></p>
+  </div>
+
+  <script>
+    const formSection = document.getElementById("form-section");
+    const msg = document.getElementById("msg");
+    const roleSelect = document.getElementById("role");
+
+    const API_BASE_URL = 'http://127.0.0.1:5000'; // Your Flask backend URL
+
+    roleSelect.addEventListener("change", () => {
+      const role = roleSelect.value;
+      if (!role) {
+        formSection.innerHTML = "";
+        return;
+      }
+
+      let formHTML = `
+        <input type="text" id="name" placeholder="${role === 'student' ? 'Student Name' : role === 'teacher' ? 'Teacher Name' : 'Admin Name'}" required>
+        <input type="text" id="id" placeholder="${role === 'student' ? 'Student ID' : role === 'teacher' ? 'Teacher ID' : 'Admin ID'}" required>
+        ${role === 'student' ? 
+          `<input type="email" id="email" placeholder="Student Email" required>
+           <input type="tel" id="phone" placeholder="Student Phone Number" required>
+           <input type="text" id="semester" placeholder="Student Semester" required>
+           <input type="text" id="branch" placeholder="Student Branch" required>
+           <input type="text" id="course" placeholder="Student Course" required>
+           <label for="photo" style="color:white; text-align:left; margin-top:10px; display:block;">Student Photo:</label>
+           <input type="file" id="photo" accept="image/*">
+           <div id="photo-preview-container" style="margin-top: 10px; text-align: center; display: none;">
+               <img id="photo-preview" src="#" alt="Photo Preview" style="max-width: 100px; max-height: 100px; border-radius: 50%; object-fit: cover;">
+           </div>` : 
+         role === 'teacher' ? 
+          `<select id="title" required>
+               <option value="">Select Title</option>
+               <option value="Prof.">Prof.</option>
+               <option value="Dr.">Dr.</option>
+               <option value="Mr.">Mr.</option>
+               <option value="Ms.">Ms.</option>
+           </select>
+           <input type="email" id="email" placeholder="Teacher Email" required>
+           <input type="tel" id="phone" placeholder="Teacher Phone Number" required>
+           <label for="photo" style="color:white; text-align:left; margin-top:10px; display:block;">Teacher Photo:</label>
+           <input type="file" id="photo" accept="image/*">
+           <div id="photo-preview-container" style="margin-top: 10px; text-align: center; display: none;">
+               <img id="photo-preview" src="#" alt="Photo Preview" style="max-width: 100px; max-height: 100px; border-radius: 50%; object-fit: cover;">
+           </div>` : ''}
+        <input type="password" id="password" placeholder="Password" required>
+        <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+        <button id="registerBtn">Register</button>
+      `;
+      formSection.innerHTML = formHTML;
+
+      if (role === 'student' || role === 'teacher') {
+        const photoInput = document.getElementById('photo');
+        const photoPreviewContainer = document.getElementById('photo-preview-container');
+        const photoPreview = document.getElementById('photo-preview');
+
+        photoInput.addEventListener('change', function() {
+          const file = this.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = e => {
+              photoPreview.src = e.target.result;
+              photoPreviewContainer.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+          } else {
+            photoPreview.src = '#';
+            photoPreviewContainer.style.display = 'none';
+          }
+        });
+      }
+
+      document.getElementById("registerBtn").addEventListener("click", async () => {
+        const name = document.getElementById("name").value.trim();
+        const id = document.getElementById("id").value.trim();
+        const pass = document.getElementById("password").value.trim();
+        const confirmPass = document.getElementById("confirmPassword").value.trim();
+
+        // Student-specific fields
+        let email = '', phone = '', semester = '', branch = '', course = '', photo = '', title = '';
+        if (role === 'student') {
+          email = document.getElementById('email').value.trim();
+          phone = document.getElementById('phone').value.trim();
+          semester = document.getElementById('semester').value.trim();
+          branch = document.getElementById('branch').value.trim();
+          course = document.getElementById('course').value.trim();
+          const photoPreview = document.getElementById('photo-preview');
+          photo = photoPreview.src !== '#' ? photoPreview.src : '';
+
+          if (!email || !phone || !semester || !branch || !course) {
+            msg.innerHTML = "<p style='color:red;'>⚠️ Please fill all student details!</p>";
+            return;
+          }
+        } else if (role === 'teacher') {
+          title = document.getElementById('title').value.trim();
+          email = document.getElementById('email').value.trim();
+          phone = document.getElementById('phone').value.trim();
+          const photoPreview = document.getElementById('photo-preview');
+          photo = photoPreview.src !== '#' ? photoPreview.src : '';
+
+          if (!title || !email || !phone) {
+            msg.innerHTML = "<p style='color:red;'>⚠️ Please fill all teacher details!</p>";
+            return;
+          }
+        }
+
+        if (!name || !id || !pass || !confirmPass) {
+          msg.innerHTML = "<p style='color:red;'>⚠️ Please fill all fields!</p>";
+          return;
+        }
+        if (pass !== confirmPass) {
+          msg.innerHTML = "<p style='color:red;'>❌ Passwords do not match!</p>";
+          return;
+        }
+
+        const registrationData = {
+          name: name,
+          id: id,
+          password: pass,
+          type: role
+        };
+
+        if (role === 'student') {
+          registrationData.email = email;
+          registrationData.phone = phone;
+          registrationData.semester = semester;
+          registrationData.branch = branch;
+          registrationData.course = course;
+          registrationData.photo = photo;
+        } else if (role === 'teacher') {
+          registrationData.title = title;
+          registrationData.email = email;
+          registrationData.phone = phone;
+          registrationData.photo = photo;
+        }
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/register`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(registrationData)
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            msg.innerHTML = `<p style='color:lightgreen;'>✅ ${result.message} Redirecting...</p>`;
+            setTimeout(() => {
+              console.log("Attempting to redirect...");
+              window.location.href = "/login"; // Redirect to login page after successful registration
+            }, 1500);
+          } else if (response.status === 409) { // Check for 409 Conflict
+            msg.innerHTML = `<p style='color:orange;'>⚠️ ${result.message} Redirecting to login...</p>`;
+            setTimeout(() => {
+              window.location.href = "/login";
+            }, 1500);
+          }
+          else {
+            msg.innerHTML = `<p style='color:red;'>❌ ${result.message || 'Registration failed!'}</p>`;
+          }
+        } catch (error) {
+          console.error("Error during registration:", error);
+          msg.innerHTML = "<p style='color:red;'>An error occurred during registration. Please try again.</p>";
+        }
+      });
+    });
+  </script>
+</body>
+</html>

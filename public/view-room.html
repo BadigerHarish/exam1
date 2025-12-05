@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Rooms - Exam Hall Management System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        header {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            color: white;
+            padding: 0;
+            position: sticky;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        nav ul {
+            list-style: none;
+            padding: 0;
+            text-align: center;
+            margin: 0;
+            display: flex;
+            justify-content: space-between; /* Changed to space-between */
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2px;
+        }
+        nav ul li {
+            position: relative;
+        }
+        nav ul li a {
+            color: #e2e8f0;
+            text-decoration: none;
+            padding: 16px 20px;
+            display: block;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            position: relative;
+            border-radius: 8px;
+            margin: 4px;
+        }
+        nav ul li a::before {
+            content: '';
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%) scaleX(0);
+            width: 60%;
+            height: 2px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            transition: transform 0.3s ease;
+        }
+        nav ul li a:hover {
+            background: rgba(59, 130, 246, 0.1);
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+        nav ul li a:hover::before {
+            transform: translateX(-50%) scaleX(1);
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            min-width: 200px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            z-index: 1001;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            border-radius: 12px;
+            overflow: hidden;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-top: 8px;
+        }
+        .dropdown-content a {
+            color: #1e293b;
+            padding: 14px 20px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            position: relative;
+            border-left: 3px solid transparent;
+        }
+        .dropdown-content a:hover {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+            color: #3b82f6;
+            border-left-color: #3b82f6;
+            padding-left: 24px;
+        }
+        .dropdown:hover .dropdown-content {
+            display: block;
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        main {
+            padding: 40px 20px;
+            text-align: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: clamp(2rem, 4vw, 2.5rem);
+            margin-bottom: 30px;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            font-weight: 700;
+        }
+        table {
+            width: 100%;
+            margin: 20px auto;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        th, td {
+            padding: 16px;
+            text-align: center;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        tbody tr {
+            transition: all 0.3s ease;
+        }
+        tbody tr:hover {
+            background: rgba(102, 126, 234, 0.05);
+            transform: scale(1.01);
+        }
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+        td {
+            color: #1e293b;
+            font-size: 14px;
+        }
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+            margin: 0 4px;
+        }
+        .edit-btn {
+            background: linear-gradient(135deg, #3a86ff 0%, #2563eb 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(58, 134, 255, 0.3);
+        }
+        .edit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(58, 134, 255, 0.4);
+        }
+        .delete-btn {
+            background: linear-gradient(135deg, #ff006e 0%, #e63946 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(255, 0, 110, 0.3);
+        }
+        .delete-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 0, 110, 0.4);
+        }
+        .message {
+            padding: 14px 20px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            color: white;
+            display: none;
+            font-weight: 500;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .success {
+            background: linear-gradient(135deg, #06ffa5 0%, #06d6a0 100%);
+            color: #065f46;
+            border: 1px solid #06ffa5;
+            box-shadow: 0 4px 15px rgba(6, 255, 165, 0.3);
+        }
+        .error {
+            background: linear-gradient(135deg, #ff006e 0%, #e63946 100%);
+            color: white;
+            border: 1px solid #ff006e;
+            box-shadow: 0 4px 15px rgba(255, 0, 110, 0.3);
+        }
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                gap: 0;
+            }
+            nav ul li {
+                width: 100%;
+            }
+            nav ul li a {
+                border-radius: 0;
+                margin: 0;
+            }
+            .dropdown-content {
+                position: static;
+                transform: none;
+                width: 100%;
+                margin-top: 0;
+                border-radius: 0;
+            }
+            .dropdown:hover .dropdown-content {
+                transform: none;
+            }
+            table {
+                font-size: 12px;
+            }
+            th, td {
+                padding: 10px 8px;
+            }
+            button {
+                padding: 6px 12px;
+                font-size: 11px;
+                margin: 2px;
+            }
+        }
+        .logout-btn {
+            background: linear-gradient(135deg, #ff006e 0%, #e63946 100%);
+            box-shadow: 0 4px 12px rgba(255, 0, 110, 0.3);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            color: white;
+            min-width: 100px;
+        }
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(255, 0, 110, 0.45);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="/home">Home</a></li>
+                <li><a href="/dashboard">Dashboard</a></li>
+                <li class="dropdown">
+                    <a href="#">Exams</a>
+                    <div class="dropdown-content">
+                        <a href="/add-exam">Add Exam</a>
+                        <a href="/view-exam">View Exams</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#">Rooms</a>
+                    <div class="dropdown-content">
+                        <a href="/add-room">Add Room</a>
+                        <a href="/view-room">View Rooms</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#">Subjects</a>
+                    <div class="dropdown-content">
+                        <a href="/add-subject">Add Subject</a>
+                        <a href="/view-subject">View Subjects</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#">Teachers</a>
+                    <div class="dropdown-content">
+                        <a href="/add-teacher">Add Teacher</a>
+                        <a href="/view-teacher">View Teachers</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#">Allocations</a>
+                    <div class="dropdown-content">
+                        <a href="/add-allocations">Add Room Allocation</a>
+                        <a href="/view-allocations">View Room Allocations</a>
+                        <a href="/student-allocations">Add Student Allocation</a>
+                        <a href="/view-student-allocations">View Student Allocations</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#">Students</a>
+                    <div class="dropdown-content">
+                        <a href="/add-student">Add Student</a>
+                        <a href="/view-student">View Students</a>
+                    </div>
+                </li>
+                <li id="logout-nav-item" style="margin-left: auto; display: none;">
+                  <button id="logoutBtn" class="logout-btn">Logout</button>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+<main>
+    <h1>View All Rooms</h1>
+    <div id="message"></div> <!-- Added message div -->
+    <table id="room-table">
+        <thead>
+            <tr>
+                <th>Room Name</th>
+                <th>Capacity</th>
+                <th>Floor</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</main>
+
+<script>
+const tableBody = document.querySelector('#room-table tbody');
+const messageDiv = document.getElementById('message'); // Get the message div
+
+const API_BASE_URL = 'http://127.0.0.1:5000'; // Your Flask backend URL
+
+let allRooms = []; // To store fetched room data
+
+function showMessage(type, message) {
+    messageDiv.className = `message ${type}`;
+    messageDiv.innerHTML = message;
+    messageDiv.style.display = 'block';
+    setTimeout(() => messageDiv.style.display = 'none', 3000); // Hide after 3 seconds
+}
+
+async function fetchRooms() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/rooms`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        allRooms = await response.json();
+        renderRooms();
+    } catch (error) {
+        console.error("Error fetching rooms:", error);
+        showMessage('error', '❌ Failed to load rooms. Please try again later.');
+        tableBody.innerHTML = '<tr><td colspan="5">Failed to load rooms.</td></tr>';
+    }
+}
+
+function renderRooms() {
+    tableBody.innerHTML = '';
+
+    if (allRooms.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="4">No rooms available</td></tr>';
+        return;
+    }
+
+    allRooms.forEach(room => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${room.name || '-'}</td>
+            <td>${room.capacity || '-'}</td>
+            <td>${room.floor || '-'}</td>
+            <td>
+                <button class="edit-btn" onclick="editRoom('${room._id}')">Edit</button>
+                <button class="delete-btn" onclick="deleteRoom('${room._id}')">Delete</button>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+window.deleteRoom = async (id) => {
+    if (confirm('Are you sure you want to delete this room?')) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/rooms/${id}`, {
+                method: 'DELETE'
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                showMessage('success', `✅ ${result.message}`);
+                fetchRooms(); // Refresh table
+            } else {
+                showMessage('error', `❌ ${result.message || 'Failed to delete room.'}`);
+            }
+        } catch (error) {
+            console.error("Error deleting room:", error);
+            showMessage('error', 'An error occurred while deleting the room.');
+        }
+    }
+}
+
+window.editRoom = async (id) => {
+    const room = allRooms.find(r => r._id === id);
+    if (!room) {
+        showMessage('error', 'Room not found for editing.');
+        return;
+    }
+
+    const newName = prompt("Edit Room Name:", room.name);
+    const newCapacity = prompt("Edit Capacity:", room.capacity);
+    const newFloor = prompt("Edit Floor:", room.floor);
+
+    if (!newName || !newCapacity || !newFloor) {
+        showMessage('error', '⚠️ All fields are required for editing!');
+        return;
+    }
+
+    const updatedRoomData = {
+        name: newName.trim(),
+        capacity: parseInt(newCapacity),
+        floor: newFloor.trim()
+    };
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/rooms/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedRoomData)
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            showMessage('success', `✅ ${result.message}`);
+            fetchRooms(); // Refresh table
+        } else {
+            showMessage('error', `❌ ${result.message || 'Failed to update room.'}`);
+        }
+    } catch (error) {
+        console.error("Error updating room:", error);
+        showMessage('error', 'An error occurred while updating the room.');
+    }
+};
+
+fetchRooms(); // Initial load
+
+const logoutBtn = document.getElementById('logoutBtn');
+const logoutNavItem = document.getElementById('logout-nav-item');
+
+function checkLoginStatus() {
+    const currentUser = sessionStorage.getItem('currentUser');
+    if (currentUser) {
+        logoutNavItem.style.display = 'block';
+        logoutBtn.style.opacity = '1';
+        logoutBtn.style.visibility = 'visible';
+    } else {
+        logoutNavItem.style.display = 'none';
+        logoutBtn.style.opacity = '0';
+        logoutBtn.style.visibility = 'hidden';
+    }
+}
+
+if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+        sessionStorage.removeItem('currentUser');
+        sessionStorage.removeItem('currentTeacherId');
+        sessionStorage.removeItem('currentTeacherName');
+        sessionStorage.removeItem('currentStudentId');
+        sessionStorage.removeItem('currentStudentName');
+        window.location.href = '/register';
+    });
+}
+
+checkLoginStatus();
+window.addEventListener('storage', checkLoginStatus);
+
+</script>
+
+</body>
+</html>

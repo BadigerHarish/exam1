@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Home - Exam Hall Management</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #6a11cb, #2575fc);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 450px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 25px;
+      font-size: 2em;
+      font-weight: bold;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #555;
+      font-weight: bold;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #c0c0c0;
+      border-radius: 5px;
+      box-sizing: border-box;
+      font-size: 1em;
+      transition: border-color 0.3s ease;
+    }
+
+    input[type="text"]:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1.1em;
+      width: 100%;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+      transform: translateY(-2px);
+    }
+
+    #error-msg {
+      color: #dc3545;
+      margin-top: 15px;
+      font-weight: bold;
+      display: none;
+    }
+
+    #teacherAllocationsSection {
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 900px;
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    #teacherAllocationsSection h1 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 1.8em;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #e0e0e0;
+      text-align: left;
+    }
+
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f8f8f8;
+    }
+
+    tr:hover {
+      background-color: #e9f7ff;
+    }
+
+    #no-allocations-msg {
+      color: #6c757d;
+      margin-top: 20px;
+      font-size: 1.1em;
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .container, #teacherAllocationsSection {
+        margin: 20px;
+        padding: 20px;
+      }
+
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+
+      thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+      }
+
+      tr {
+        border: 1px solid #ccc;
+        margin-bottom: 10px;
+        border-radius: 5px;
+      }
+
+      td {
+        border: none;
+        border-bottom: 1px solid #eee;
+        position: relative;
+        padding-left: 50%;
+        text-align: right;
+      }
+
+      td:before {
+        position: absolute;
+        top: 6px;
+        left: 6px;
+        width: 45%;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: bold;
+        content: attr(data-label);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="teacherInfoContainer">
+    <h1 id="welcomeMessage">Welcome, Teacher!</h1>
+    <p><strong>Name:</strong> <span id="teacherNameDisplay"></span></p>
+    <p><strong>Teacher ID:</strong> <span id="teacherIdDisplay"></span></p>
+    <p id="loginPrompt" style="display: none;">Please log in to view your allocations.</p>
+    <button id="logoutBtn" style="background-color: #dc3545; margin-top: 20px;">Logout</button>
+  </div>
+
+  <div id="teacherAllocationsSection" style="display: none;">
+    <h1>My Allocations</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Exam Name</th> <!-- Changed to Exam Name -->
+          <th>Date</th>
+          <th>Time</th>
+          <th>Subject</th>
+          <th>Branch</th>
+          <th>Course</th>
+          <th>Semester</th>
+          <th>Room</th>
+          <th>Teacher ID</th>
+          <th>Teacher Name</th>
+        </tr>
+      </thead>
+      <tbody id="teacherAllocationsTableBody"></tbody>
+    </table>
+    <p id="no-allocations-msg">No allocations found for your ID.</p>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const teacherAllocationsSection = document.getElementById('teacherAllocationsSection');
+      const teacherAllocationsTableBody = document.getElementById('teacherAllocationsTableBody');
+      const noAllocationsMsg = document.getElementById('no-allocations-msg');
+      const welcomeMessage = document.getElementById('welcomeMessage');
+      const teacherNameDisplay = document.getElementById('teacherNameDisplay');
+      const teacherIdDisplay = document.getElementById('teacherIdDisplay');
+      const loginPrompt = document.getElementById('loginPrompt');
+      const teacherInfoContainer = document.getElementById('teacherInfoContainer');
+
+      const API_BASE_URL = 'http://127.0.0.1:5000'; // Your Flask backend URL
+
+      function showMessage(element, type, message) {
+        // A simple way to display messages, can be enhanced
+        element.textContent = message;
+        element.style.color = (type === 'error') ? 'red' : 'green';
+        element.style.display = 'block';
+        setTimeout(() => element.style.display = 'none', 3000);
+      }
+
+      async function fetchTeacherAllocations(teacherId) {
+        try {
+          // Fetch all room allocations
+          const response = await fetch(`${API_BASE_URL}/allocations`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const allAllocations = await response.json();
+
+          const filteredAllocations = allAllocations.filter(allocation => allocation.teacher_id === teacherId);
+
+          teacherAllocationsTableBody.innerHTML = ''; // Clear previous results
+          if (filteredAllocations.length === 0) {
+            noAllocationsMsg.style.display = 'block';
+            teacherAllocationsTableBody.innerHTML = '<tr><td colspan="10">No allocations found for your ID.</td></tr>'; // Adjusted colspan
+          } else {
+            noAllocationsMsg.style.display = 'none';
+            filteredAllocations.forEach(a => {
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td data-label="Exam Name">${a.exam_name || '-'}</td>
+                <td data-label="Date">${a.exam_date || '-'}</td>
+                <td data-label="Time">${a.startTime || '-'}</td> <!-- Using startTime for Time -->
+                <td data-label="Subject">${a.subject || '-'}</td>
+                <td data-label="Branch">${a.branch || '-'}</td>
+                <td data-label="Course">${a.course || '-'}</td>
+                <td data-label="Semester">${a.semester || '-'}</td>
+                <td data-label="Room">${a.room || '-'}</td>
+                <td data-label="Teacher ID">${a.teacher_id || '-'}</td>
+                <td data-label="Teacher Name">${teacherNameDisplay.textContent || '-'}</td>
+              `;
+              teacherAllocationsTableBody.appendChild(row);
+            });
+          }
+          teacherAllocationsSection.style.display = 'block';
+        } catch (error) {
+          console.error("Error fetching teacher allocations:", error);
+          showMessage(noAllocationsMsg, 'error', '❌ Failed to load your allocations.');
+          teacherAllocationsSection.style.display = 'block';
+        }
+      }
+
+      // Check for logged-in user from sessionStorage
+      const currentUserString = sessionStorage.getItem('currentUser');
+      if (currentUserString) {
+        const currentUser = JSON.parse(currentUserString);
+        if (currentUser.type === 'teacher') {
+          welcomeMessage.textContent = `Welcome, ${currentUser.name}!`;
+          teacherNameDisplay.textContent = currentUser.name;
+          teacherIdDisplay.textContent = currentUser.id;
+          fetchTeacherAllocations(currentUser.id); // Fetch allocations for the logged-in teacher
+          loginPrompt.style.display = 'none';
+        } else {
+          // Not a teacher or wrong type of user
+          welcomeMessage.textContent = 'Access Denied';
+          teacherNameDisplay.textContent = '';
+          teacherIdDisplay.textContent = '';
+          loginPrompt.textContent = 'You must log in as a teacher to view this page.';
+          loginPrompt.style.display = 'block';
+          teacherAllocationsSection.style.display = 'none';
+        }
+      } else {
+        // No user logged in
+        welcomeMessage.textContent = 'Hello!';
+        teacherNameDisplay.textContent = '';
+        teacherIdDisplay.textContent = '';
+        loginPrompt.textContent = 'Please log in to view your allocations.';
+        loginPrompt.style.display = 'block';
+        teacherAllocationsSection.style.display = 'none';
+      }
+
+      // Add logout functionality
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+          sessionStorage.removeItem('currentUser'); // Clear the current user from session storage
+          window.location.href = '/register'; // Redirect to the register page
+        });
+      }
+    });
+
+  </script>
+</body>
+</html>

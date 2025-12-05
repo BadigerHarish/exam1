@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Home - Exam Hall Management</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      background: linear-gradient(to right, #6a11cb, #2575fc); /* Gradient background */
+    }
+    .container {
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px; /* Slightly more rounded corners */
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* Enhanced shadow */
+      width: 100%;
+      max-width: 450px; /* Slightly wider container */
+      text-align: center;
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 25px;
+      font-size: 2em; /* Larger heading */
+      font-weight: bold;
+    }
+    .form-group {
+      margin-bottom: 18px; /* More space between form groups */
+      text-align: left;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #555;
+      font-weight: bold;
+    }
+    input[type="text"] {
+      width: calc(100% - 24px); /* Adjust for padding and border */
+      padding: 12px;
+      border: 1px solid #c0c0c0; /* Lighter border */
+      border-radius: 5px;
+      box-sizing: border-box;
+      font-size: 1em;
+      transition: border-color 0.3s ease; /* Smooth transition for focus */
+    }
+    input[type="text"]:focus {
+      border-color: #007bff; /* Highlight on focus */
+      outline: none;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1.1em; /* Larger button text */
+      width: 100%;
+      transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transitions */
+    }
+    button:hover {
+      background-color: #0056b3;
+      transform: translateY(-2px); /* Slight lift effect */
+    }
+    #error-msg {
+      color: #dc3545; /* Red for errors */
+      margin-top: 15px;
+      font-weight: bold;
+      display: none;
+    }
+
+    /* Styles for the Allocations Section */
+    #studentAllocationsSection {
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 900px; /* Wider for table */
+      margin-top: 30px; /* Space between form and table */
+      text-align: center;
+    }
+
+    #studentAllocationsSection h1 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 1.8em;
+    }
+
+    #studentAllocationsSection table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    #studentAllocationsSection th,
+    #studentAllocationsSection td {
+      padding: 12px;
+      border: 1px solid #e0e0e0;
+      text-align: left;
+    }
+
+    #studentAllocationsSection th {
+      background-color: #007bff;
+      color: white;
+      font-weight: bold;
+    }
+
+    #studentAllocationsSection tr:nth-child(even) {
+      background-color: #f8f8f8;
+    }
+
+    #studentAllocationsSection tr:hover {
+      background-color: #e9f7ff; /* Highlight row on hover */
+    }
+
+    #no-allocations-msg {
+      color: #6c757d;
+      margin-top: 20px;
+      font-size: 1.1em;
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .container, #studentAllocationsSection {
+        margin: 20px;
+        padding: 20px;
+      }
+      #studentAllocationsSection table, #studentAllocationsSection thead, #studentAllocationsSection tbody, #studentAllocationsSection th, #studentAllocationsSection td, #studentAllocationsSection tr {
+        display: block;
+      }
+      #studentAllocationsSection thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+      }
+      #studentAllocationsSection tr {
+        border: 1px solid #ccc;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        overflow: hidden;
+      }
+      #studentAllocationsSection td {
+        border: none;
+        border-bottom: 1px solid #eee;
+        position: relative;
+        padding-left: 50%;
+        text-align: right;
+      }
+      #studentAllocationsSection td:last-child {
+        border-bottom: 0;
+      }
+      #studentAllocationsSection td:before {
+        position: absolute;
+        top: 6px;
+        left: 6px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: bold;
+        content: attr(data-label);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="studentInfoContainer">
+    <h1 id="welcomeMessage">Welcome, Student!</h1>
+    <p><strong>Name:</strong> <span id="studentNameDisplay"></span></p>
+    <p><strong>Student ID:</strong> <span id="studentIdDisplay"></span></p>
+    <p id="loginPrompt" style="display: none;">Please log in to view your allocations.</p>
+    <button id="logoutBtn" style="background-color: #dc3545; margin-top: 20px;">Logout</button>
+  </div>
+
+  <div id="studentAllocationsSection" style="display: none; margin-top: 30px;">
+    <h1>My Allocations</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Student Name</th>
+          <th>Student ID</th>
+          <th>Semester</th>
+          <th>Branch</th>
+          <th>Course</th>
+          <th>Room Name</th>
+          <th>Room Floor</th>
+          <th>Seat Number</th>
+        </tr>
+      </thead>
+      <tbody id="studentAllocationsTableBody"></tbody>
+    </table>
+    <p id="no-allocations-msg" style="display: none;">No allocations found for your ID.</p>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const studentAllocationsSection = document.getElementById('studentAllocationsSection');
+      const studentAllocationsTableBody = document.getElementById('studentAllocationsTableBody');
+      const noAllocationsMsg = document.getElementById('no-allocations-msg');
+      const welcomeMessage = document.getElementById('welcomeMessage');
+      const studentNameDisplay = document.getElementById('studentNameDisplay');
+      const studentIdDisplay = document.getElementById('studentIdDisplay');
+      const loginPrompt = document.getElementById('loginPrompt');
+      const studentInfoContainer = document.getElementById('studentInfoContainer');
+
+      const API_BASE_URL = 'http://127.0.0.1:5000'; // Your Flask backend URL
+
+      function showMessage(element, type, message) {
+        // A simple way to display messages, can be enhanced
+        element.textContent = message;
+        element.style.color = (type === 'error') ? 'red' : 'green';
+        element.style.display = 'block';
+        setTimeout(() => element.style.display = 'none', 3000);
+      }
+
+      async function displayStudentAllocations(studentId) {
+        try {
+          // Fetch all student allocations and filter on frontend
+          const response = await fetch(`${API_BASE_URL}/student_allocations`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const allStudentAllocations = await response.json();
+
+          const filteredAllocations = allStudentAllocations.filter(allocation => allocation.student_id === studentId);
+
+          studentAllocationsTableBody.innerHTML = ''; // Clear previous results
+          if (filteredAllocations.length === 0) {
+            noAllocationsMsg.style.display = 'block';
+            studentAllocationsTableBody.innerHTML = '<tr><td colspan="8">No allocations found for your ID.</td></tr>';
+          } else {
+            noAllocationsMsg.style.display = 'none';
+            filteredAllocations.forEach(a => {
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td data-label="Student Name">${a.student_name || '-'}</td>
+                <td data-label="Student ID">${a.student_id || '-'}</td>
+                <td data-label="Semester">${a.student_semester || '-'}</td>
+                <td data-label="Branch">${a.student_branch || '-'}</td>
+                <td data-label="Course">${a.student_course || '-'}</td>
+                <td data-label="Room Name">${a.room_name || '-'}</td>
+                <td data-label="Room Floor">${a.room_floor || '-'}</td>
+                <td data-label="Seat Number">${a.seat_number !== undefined && a.seat_number !== null ? a.seat_number : '-'}</td>
+              `;
+              studentAllocationsTableBody.appendChild(row);
+            });
+          }
+          studentAllocationsSection.style.display = 'block';
+        } catch (error) {
+          console.error("Error fetching student allocations:", error);
+          showMessage(noAllocationsMsg, 'error', '❌ Failed to load your allocations.');
+          studentAllocationsSection.style.display = 'block';
+        }
+      }
+
+      // Check for logged-in user from sessionStorage
+      const currentUserString = sessionStorage.getItem('currentUser');
+      if (currentUserString) {
+        const currentUser = JSON.parse(currentUserString);
+        if (currentUser.type === 'student') {
+          welcomeMessage.textContent = `Welcome, ${currentUser.name}!`;
+          studentNameDisplay.textContent = currentUser.name;
+          studentIdDisplay.textContent = currentUser.id;
+          displayStudentAllocations(currentUser.id);
+          // Hide the login form container (now displays student info)
+          // studentInfoContainer.style.display = 'block'; // Already block by default
+          loginPrompt.style.display = 'none';
+        } else {
+          // Not a student or wrong type of user
+          welcomeMessage.textContent = 'Access Denied';
+          studentNameDisplay.textContent = '';
+          studentIdDisplay.textContent = '';
+          loginPrompt.textContent = 'You must log in as a student to view this page.';
+          loginPrompt.style.display = 'block';
+          studentAllocationsSection.style.display = 'none';
+        }
+      } else {
+        // No user logged in
+        welcomeMessage.textContent = 'Hello!';
+        studentNameDisplay.textContent = '';
+        studentIdDisplay.textContent = '';
+        loginPrompt.textContent = 'Please log in to view your allocations.';
+        loginPrompt.style.display = 'block';
+        studentAllocationsSection.style.display = 'none';
+      }
+
+      // Add logout functionality
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+          sessionStorage.removeItem('currentUser'); // Clear the current user from session storage
+          window.location.href = '/register'; // Redirect to the register page
+        });
+      }
+
+      // Remove the old form submission listener as the form is removed
+      // document.getElementById('studentLoginForm').removeEventListener('submit', ...);
+
+    });
+
+  </script>
+</body>
+</html>
