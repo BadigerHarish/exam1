@@ -453,7 +453,7 @@
         welcomeMessage.textContent = 'Welcome, Teacher!';
         teacherAllocationsSection.style.display = 'none';
         loginPrompt.style.display = 'block';
-        logoutBtn.style.display = 'none'; // Hide logout button on clear
+        logoutBtn.style.display = 'none'; // Ensure it's hidden on clear
       });
 
       logoutBtn.addEventListener('click', () => {
@@ -488,10 +488,12 @@
           teacherLoginForm.style.display = 'none';
           loginPrompt.style.display = 'none';
           initializeForTeacher(id, name);
+          logoutBtn.style.display = 'inline-block'; // Show logout button if logged in via URL
         } else if (savedId && savedName) {
           teacherLoginForm.style.display = 'none';
           loginPrompt.style.display = 'none';
           initializeForTeacher(savedId, savedName);
+          logoutBtn.style.display = 'inline-block'; // Show logout button if logged in via session storage
         } else {
           teacherLoginForm.style.display = 'block';
           teacherAllocationsSection.style.display = 'none';

@@ -595,6 +595,31 @@
       transform: translateY(-2px);
       box-shadow: 0 6px 18px rgba(255, 0, 110, 0.45);
     }
+
+    /* Message Box Styles */
+    .message-box {
+      max-width: 600px;
+      margin: 0 auto 20px;
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-weight: 500;
+      text-align: center;
+      display: none;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+      color: white;
+    }
+
+    .message-box.success {
+      background: linear-gradient(135deg, #06ffa5 0%, #06d6a0 100%);
+      color: #065f46;
+      border: 1px solid #06ffa5;
+    }
+
+    .message-box.error {
+      background: linear-gradient(135deg, #ff006e 0%, #e63946 100%);
+      color: white;
+      border: 1px solid #ff006e;
+    }
   </style>
 </head>
 <body>
@@ -667,6 +692,7 @@
     <div class="hero-content">
       <h1>Welcome to Exam Hall Management System</h1>
       <p>Streamline your exam management process with our comprehensive platform. Manage exams, rooms, subjects, teachers, and allocations efficiently and effortlessly.</p>
+      <div id="msg" class="message-box" style="display: none; margin-bottom: 20px;"></div>
       <div class="cta-buttons">
         <a href="/dashboard" class="btn btn-primary">Get Started</a>
         <a href="/view-exam" class="btn btn-secondary">View Exams</a>
@@ -745,7 +771,19 @@
     }
 
     // Initialize particles on load
-    window.addEventListener('load', createParticles);
+    window.addEventListener('load', () => {
+      createParticles();
+      showMessage('success', 'Welcome to the Home Page!'); // Test message
+    });
+
+    const msgDiv = document.getElementById('msg');
+
+    function showMessage(type, message) {
+      msgDiv.className = `message-box ${type}`;
+      msgDiv.innerHTML = message;
+      msgDiv.style.display = 'block';
+      setTimeout(() => msgDiv.style.display = 'none', 3000);
+    }
   </script>
 
   <script>

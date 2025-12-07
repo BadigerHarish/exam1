@@ -232,6 +232,15 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 18px rgba(255, 0, 110, 0.45);
         }
+        .export-btn {
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+          margin-bottom: 20px;
+        }
+        .export-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+        }
         @media (max-width: 768px) {
             nav ul {
                 flex-direction: column;
@@ -328,17 +337,23 @@
         <h1>View Student Allocations</h1>
         <div id="msg"></div>
 
+        <button id="exportBtn" class="export-btn">Export to CSV</button>
+
         <table>
             <thead>
                 <tr>
+                    <th>Date</th>
                     <th>Student Name</th>
                     <th>Student ID</th>
                     <th>Semester</th>
                     <th>Branch</th>
                     <th>Course</th>
+                    <th>Subject</th>
                     <th>Room Name</th>
                     <th>Room Floor</th>
                     <th>Seat Number</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -388,21 +403,25 @@
             }
 
             if (filteredAllocations.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="9">No student allocations found for ID: ${currentStudentId || 'N/A'}.</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="10">No student allocations found for ID: ${currentStudentId || 'N/A'}.</td></tr>`;
                 return;
             }
 
             filteredAllocations.forEach(a => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
+                    <td>${a.exam_date || '-'}</td>
                     <td>${a.student_name || '-'}</td>
                     <td>${a.student_id || '-'}</td>
                     <td>${a.student_semester || '-'}</td>
                     <td>${a.student_branch || '-'}</td>
                     <td>${a.student_course || '-'}</td>
+                    <td>${a.subject || '-'}</td>
                     <td>${a.room_name || '-'}</td>
                     <td>${a.room_floor || '-'}</td>
                     <td>Seat: ${a.seat_number !== undefined && a.seat_number !== null ? a.seat_number : '-'}</td>
+                    <td>${a.start_time || '-'}</td>
+                    <td>${a.end_time || '-'}</td>
                     <td>
                         <button class="edit-btn" onclick="editStudentAllocation('${a._id}')">Edit</button>
                         <button class="delete-btn" onclick="deleteStudentAllocation('${a._id}')">Delete</button>
@@ -445,11 +464,15 @@
             const newStudentSemester = prompt("Edit Student Semester:", alloc.student_semester);
             const newStudentBranch = prompt("Edit Student Branch:", alloc.student_branch);
             const newStudentCourse = prompt("Edit Student Course:", alloc.student_course);
+            const newSubject = prompt("Edit Subject:", alloc.subject);
             const newRoomName = prompt("Edit Room Name:", alloc.room_name);
             const newRoomFloor = prompt("Edit Room Floor:", alloc.room_floor);
             const newSeatNumber = prompt("Edit Seat Number:", alloc.seat_number);
+            const newExamDate = prompt("Edit Exam Date (YYYY-MM-DD):", alloc.exam_date);
+            const newStartTime = prompt("Edit Start Time (HH:MM):", alloc.start_time);
+            const newEndTime = prompt("Edit End Time (HH:MM):", alloc.end_time);
 
-            if (!newStudentName || !newStudentId || !newStudentSemester || !newStudentBranch || !newStudentCourse || !newRoomName || !newRoomFloor || !newSeatNumber) {
+            if (!newStudentName || !newStudentId || !newStudentSemester || !newStudentBranch || !newStudentCourse || !newSubject || !newRoomName || !newRoomFloor || !newSeatNumber || !newExamDate || !newStartTime || !newEndTime) {
                 showMessage('error', '⚠️ All fields are required for editing!');
                 return;
             }
@@ -460,9 +483,13 @@
                 student_semester: newStudentSemester.trim(),
                 student_branch: newStudentBranch.trim(),
                 student_course: newStudentCourse.trim(),
+                subject: newSubject.trim(),
                 room_name: newRoomName.trim(),
                 room_floor: newRoomFloor.trim(),
-                seat_number: newSeatNumber.trim()
+                seat_number: newSeatNumber.trim(),
+                exam_date: newExamDate.trim(),
+                start_time: newStartTime.trim(),
+                end_time: newEndTime.trim()
             };
 
             try {
@@ -507,11 +534,60 @@
         }
 
         fetchStudentAllocations(); // Initial load
+
+        const exportBtn = document.getElementById('exportBtn');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => {
+                let dataToExport = allStudentAllocations;
+                if (currentStudentId) {
+                    dataToExport = allStudentAllocations.filter(a => a.student_id === currentStudentId);
+                }
+
+                if (!dataToExport.length) {
+                    showMessage('error', 'No data to export.');
+                    return;
+                }
+
+                const headers = [
+                    "Date", "Student Name", "Student ID", "Semester", "Branch", 
+                    "Course", "Subject", "Room Name", "Room Floor", "Seat Number", "Start Time", "End Time"
+                ];
+                
+                const csvRows = dataToExport.map(row => {
+                    return [
+                        `"${(row.exam_date || '').replace(/"/g, '""')}"`,
+                        `"${(row.student_name || '').replace(/"/g, '""')}"`,
+                        `"${(row.student_id || '').replace(/"/g, '""')}"`,
+                        `"${(row.student_semester || '').replace(/"/g, '""')}"`,
+                        `"${(row.student_branch || '').replace(/"/g, '""')}"`,
+                        `"${(row.student_course || '').replace(/"/g, '""')}"`,
+                        `"${(row.subject || '').replace(/"/g, '""')}"`,
+                        `"${(row.room_name || '').replace(/"/g, '""')}"`,
+                        `"${(row.room_floor || '').replace(/"/g, '""')}"`,
+                        `"${(row.seat_number !== undefined && row.seat_number !== null ? row.seat_number : '').toString().replace(/"/g, '""')}"`,
+                        `"${(row.start_time || '').replace(/"/g, '""')}"`,
+                        `"${(row.end_time || '').replace(/"/g, '""')}"`
+                    ].join(',');
+                });
+
+                const csvContent = [headers.join(',')].concat(csvRows).join('\n');
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `student_allocations_${new Date().toISOString().slice(0, 10)}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+            });
+        }
+
+
     </script>
     <script>
     // Logout functionality
-    const logoutBtn = document.getElementById('logoutBtn');
-    const logoutNavItem = document.getElementById('logout-nav-item');
+    
 
     function checkLoginStatus() {
         const currentUser = sessionStorage.getItem('currentUser');

@@ -45,7 +45,7 @@
             text-align: center;
             margin: 0;
             display: flex;
-            justify-content: space-between; /* Changed to space-between */
+            justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 2px;
@@ -197,7 +197,9 @@
             font-size: 14px;
         }
         form select,
-        form input[type="number"] {
+        form input[type="number"],
+        form input[type="time"],
+        form input[type="date"] {
             width: 100%;
             padding: 12px 16px;
             margin-bottom: 20px;
@@ -208,7 +210,9 @@
             background: white;
         }
         form select:focus,
-        form input[type="number"]:focus {
+        form input[type="number"]:focus,
+        form input[type="time"]:focus,
+        form input[type="date"]:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
@@ -272,22 +276,25 @@
                 padding: 30px 20px;
             }
         }
-    .logout-btn {
-      background: linear-gradient(135deg, #ff006e 0%, #e63946 100%);
-      box-shadow: 0 4px 12px rgba(255, 0, 110, 0.3);
-      padding: 12px 20px;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 14px;
-      transition: all 0.3s ease;
-      color: white;
-      min-width: 100px;
-    }
-    .logout-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 18px rgba(255, 0, 110, 0.45);
-    }
+        .logout-btn {
+            background: linear-gradient(135deg, #ff006e 0%, #e63946 100%);
+            box-shadow: 0 4px 12px rgba(255, 0, 110, 0.3);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            color: white;
+            min-width: 100px;
+        }
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(255, 0, 110, 0.45);
+        }
     </style>
+    <script type="text/javascript"
+        src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
+    </script>
 </head>
 <body>
     <header>
@@ -340,7 +347,7 @@
                     </div>
                 </li>
                 <li id="logout-nav-item" style="margin-left: auto; display: none;">
-                  <button id="logoutBtn" class="logout-btn">Logout</button>
+                    <button id="logoutBtn" class="logout-btn">Logout</button>
                 </li>
             </ul>
         </nav>
@@ -367,6 +374,11 @@
                 <option value="">Select a room</option>
             </select>
 
+            <label for="subject-select">Subject:</label>
+            <select id="subject-select" required>
+                <option value="">Select a subject</option>
+            </select>
+
             <div id="room-details" style="margin-bottom: 20px; text-align: left;">
                 <p><strong>Floor:</strong> <span id="room-floor-display"></span></p>
             </div>
@@ -374,13 +386,23 @@
             <label for="seat-number">Seat Number:</label>
             <input type="number" id="seat-number" placeholder="Enter seat number" required>
 
-            <button type="submit">Allocate Student</button>
+            <label for="exam-date">Exam Date:</label>
+            <input type="date" id="exam-date" required>
+
+            <label for="start-time">Start Time:</label>
+            <input type="time" id="start-time" required>
+
+            <label for="end-time">End Time:</label>
+            <input type="time" id="end-time" required>
+
+            <button type="submit" onclick="sendMail()">Allocate Student</button>
         </form>
     </main>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const studentSelect = document.getElementById('student-select');
             const roomSelect = document.getElementById('room-select');
+            const subjectSelect = document.getElementById('subject-select'); // New
             const allocationForm = document.getElementById('studentAllocationForm');
             const msgDiv = document.getElementById('msg');
 
@@ -403,8 +425,8 @@
                     studentSelect.innerHTML = '<option value="">Select a student</option>';
                     studentsData.forEach(student => {
                         const option = document.createElement('option');
-                        option.value = JSON.stringify(student); // Store entire student object
-                        option.textContent = `${student.name} (${student.id})`; // Using 'name' and 'id'
+                        option.value = JSON.stringify(student);
+                        option.textContent = `${student.name} (${student.id})`;
                         studentSelect.appendChild(option);
                     });
 
@@ -415,10 +437,23 @@
                     roomSelect.innerHTML = '<option value="">Select a room</option>';
                     roomsData.forEach(room => {
                         const option = document.createElement('option');
-                        option.value = JSON.stringify(room); // Store entire room object
+                        option.value = JSON.stringify(room);
                         option.textContent = `${room.name} (Floor: ${room.floor})`;
                         roomSelect.appendChild(option);
                     });
+
+                    // Fetch Subjects
+                    response = await fetch(`${API_BASE_URL}/subjects`);
+                    if (!response.ok) throw new Error('Failed to fetch subjects');
+                    const subjectsData = await response.json();
+                    subjectSelect.innerHTML = '<option value="">Select a subject</option>';
+                    subjectsData.forEach(subject => {
+                        const option = document.createElement('option');
+                        option.value = subject.name; // Store subject name
+                        option.textContent = `${subject.name} (${subject.code})`;
+                        subjectSelect.appendChild(option);
+                    });
+
                 } catch (error) {
                     console.error("Error populating dropdowns:", error);
                     showMessage('error', '❌ Failed to load data for dropdowns.');
@@ -431,7 +466,6 @@
                 if (selectedStudentString) {
                     const selectedStudent = JSON.parse(selectedStudentString);
                     document.getElementById('student-id-display').textContent = selectedStudent.id || '-';
-                    // Assuming semester, branch, course are part of student object or derived
                     document.getElementById('student-semester-display').textContent = selectedStudent.semester || '-'; 
                     document.getElementById('student-branch-display').textContent = selectedStudent.branch || '-';
                     document.getElementById('student-course-display').textContent = selectedStudent.course || '-';
@@ -458,7 +492,12 @@
 
                 const selectedStudent = studentSelect.value ? JSON.parse(studentSelect.value) : null;
                 const selectedRoom = roomSelect.value ? JSON.parse(roomSelect.value) : null;
+                const selectedSubject = subjectSelect.value; // New
                 const seatNumber = document.getElementById('seat-number').value;
+                const examDate = document.getElementById('exam-date').value; // New
+                const startTime = document.getElementById('start-time').value;
+                const endTime = document.getElementById('end-time').value;
+                
 
                 if (!selectedStudent || !selectedRoom) {
                     showMessage('error', '⚠️ Please select both a student and a room!');
@@ -468,12 +507,16 @@
                 const newStudentAllocation = {
                     student_id: selectedStudent.id,
                     student_name: selectedStudent.name,
-                    student_semester: selectedStudent.semester, // Assuming these are part of student object
+                    student_semester: selectedStudent.semester,
                     student_branch: selectedStudent.branch,
                     student_course: selectedStudent.course,
                     room_name: selectedRoom.name,
                     room_floor: selectedRoom.floor,
-                    seat_number: seatNumber
+                    seat_number: seatNumber,
+                    exam_date: examDate,
+                    start_time: startTime,
+                    end_time: endTime,
+                    subject: selectedSubject
                 };
 
                 try {
@@ -493,7 +536,7 @@
                         document.querySelectorAll('#student-details span').forEach(span => span.textContent = '');
                         document.querySelectorAll('#room-details span').forEach(span => span.textContent = '');
                         setTimeout(() => {
-                            window.location.href = '/view-student-allocations'; // Changed to Flask route
+                            window.location.href = '/view-student-allocations';
                         }, 1500);
                     } else {
                         showMessage('error', `❌ ${result.message || 'Failed to add student allocation.'}`);
@@ -504,7 +547,7 @@
                 }
             });
 
-            fetchAndPopulateDropdowns(); // Initial load for dropdowns
+            fetchAndPopulateDropdowns();
 
             const logoutBtn = document.getElementById('logoutBtn');
             const logoutNavItem = document.getElementById('logout-nav-item');

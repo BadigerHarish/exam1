@@ -140,9 +140,8 @@
       body {
         padding: 30px 15px 50px;
       }
-      .container, #studentAllocationsSection {
+      .container, #studentAllocationsSection, #studentLoginForm {
         width: 100%;
-        padding: 24px 18px;
       }
       table, thead, tbody, th, td, tr {
         display: block;
@@ -196,33 +195,42 @@
   </style>
 </head>
 <body>
+
+  <!-- LOGIN FORM MOVED TO TOP BODY -->
+  <form id="studentLoginForm" style="margin-bottom: 25px; width: min(900px, 95%);">
+    <div style="margin-bottom: 15px;">
+      <label for="studentName" style="display: block; margin-bottom: 5px; font-weight: bold;">Student Name:</label>
+      <input type="text" id="studentName" name="studentName" required 
+             style="width: 100%; padding: 12px; border-radius: 8px; border: none;">
+    </div>
+
+    <div style="margin-bottom: 15px;">
+      <label for="studentId" style="display: block; margin-bottom: 5px; font-weight: bold;">Student ID:</label>
+      <input type="text" id="studentId" name="studentId" required 
+             style="width: calc(100% - 22px); padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color: rgba(255, 255, 255, 0.8); color: #333;">
+    </div>
+
+    <button type="submit" 
+            style="background-color: #28a745; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; transition: background-color 0.3s ease;">
+      Submit
+    </button>
+    <button id="logoutBtn" type="button" 
+            style="background-color: #dc3545; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; margin-left: 10px; display: none; transition: background-color 0.3s ease;">
+      Logout
+    </button>
+  </form>
+
+  <!-- STUDENT INFO CONTAINER (NO FORM INSIDE NOW) -->
   <div class="container" id="studentInfoContainer">
     <h1 id="welcomeMessage">Welcome, Student!</h1>
     <p><strong>Name:</strong> <span id="studentNameDisplay"></span></p>
     <p><strong>Student ID:</strong> <span id="studentIdDisplay"></span></p>
-    <p class="student-photo-container"><strong>Photo:</strong> <img id="studentPhotoDisplay" src="" alt="Student Photo" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-top: 10px; display: none;"></p>
+    <p class="student-photo-container">
+      <strong>Photo:</strong>
+      <img id="studentPhotoDisplay" src="" alt="Student Photo"
+           style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-top: 10px; display: none;">
+    </p>
     <p id="loginPrompt" style="display: none;">Please log in to view your allocations.</p>
-
-    <form id="studentLoginForm" style="margin-top: 20px;">
-      <div style="margin-bottom: 15px;">
-        <label for="studentName" style="display: block; margin-bottom: 5px; font-weight: bold;">Student Name:</label>
-        <input type="text" id="studentName" name="studentName" required 
-               style="width: calc(100% - 22px); padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color: rgba(255, 255, 255, 0.8); color: #333;">
-      </div>
-      <div style="margin-bottom: 15px;">
-        <label for="studentId" style="display: block; margin-bottom: 5px; font-weight: bold;">Student ID:</label>
-        <input type="text" id="studentId" name="studentId" required 
-               style="width: calc(100% - 22px); padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color: rgba(255, 255, 255, 0.8); color: #333;">
-      </div>
-      <button type="submit" 
-              style="background-color: #28a745; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; transition: background-color 0.3s ease;">
-        Submit
-      </button>
-      <button id="logoutBtn" type="button" 
-              style="background-color: #dc3545; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; margin-left: 10px; display: none; transition: background-color 0.3s ease;">
-        Logout
-      </button>
-    </form>
   </div>
 
   <div id="studentAllocationsSection" style="display: none; margin-top: 30px;">
@@ -235,9 +243,12 @@
           <th>Semester</th>
           <th>Branch</th>
           <th>Course</th>
+          <th>Subject</th>
           <th>Room Name</th>
           <th>Room Floor</th>
           <th>Seat Number</th>
+          <th>Start Time</th>
+          <th>End Time</th>
         </tr>
       </thead>
       <tbody id="studentAllocationsTableBody"></tbody>
@@ -257,11 +268,11 @@
       const studentInfoContainer = document.getElementById('studentInfoContainer');
       const studentPhotoDisplay = document.getElementById('studentPhotoDisplay');
       const logoutBtn = document.getElementById('logoutBtn');
+      const studentLoginForm = document.getElementById('studentLoginForm');
 
       const API_BASE_URL = 'http://127.0.0.1:5000'; // Your Flask backend URL
 
       function showMessage(element, type, message) {
-        // A simple way to display messages, can be enhanced
         element.textContent = message;
         element.style.color = (type === 'error') ? 'red' : 'green';
         element.style.display = 'block';
@@ -270,7 +281,6 @@
 
       async function displayStudentAllocations(studentId) {
         try {
-          // Fetch all student allocations and filter on frontend
           const response = await fetch(`${API_BASE_URL}/student_allocations`);
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -279,7 +289,7 @@
 
           const filteredAllocations = allStudentAllocations.filter(allocation => allocation.student_id === studentId);
 
-          studentAllocationsTableBody.innerHTML = ''; // Clear previous results
+          studentAllocationsTableBody.innerHTML = '';
           if (filteredAllocations.length === 0) {
             noAllocationsMsg.style.display = 'block';
             studentAllocationsTableBody.innerHTML = '<tr><td colspan="8">No allocations found for your ID.</td></tr>';
@@ -293,9 +303,12 @@
                 <td data-label="Semester">${a.student_semester || '-'}</td>
                 <td data-label="Branch">${a.student_branch || '-'}</td>
                 <td data-label="Course">${a.student_course || '-'}</td>
+                <td data-label="Subject">${a.subject || '-'}</td>
                 <td data-label="Room Name">${a.room_name || '-'}</td>
                 <td data-label="Room Floor">${a.room_floor || '-'}</td>
                 <td data-label="Seat Number">${a.seat_number || '-'}</td>
+                <td data-label="Start Time">${a.start_time || '-'}</td>
+                <td data-label="End Time">${a.end_time || '-'}</td>
               `;
               studentAllocationsTableBody.appendChild(row);
             });
@@ -324,8 +337,8 @@
           }
           displayStudentAllocations(currentUser.id);
           loginPrompt.style.display = 'none';
-          studentLoginForm.style.display = 'none';
-          logoutBtn.style.display = 'inline-block'; // Show logout button
+          if (studentLoginForm) studentLoginForm.style.display = 'none';
+          if (logoutBtn) logoutBtn.style.display = 'inline-block';
         } else {
           welcomeMessage.textContent = 'Access Denied';
           studentNameDisplay.textContent = '';
@@ -333,8 +346,8 @@
           loginPrompt.textContent = 'You must log in as a student to view this page.';
           loginPrompt.style.display = 'block';
           studentAllocationsSection.style.display = 'none';
-          studentLoginForm.style.display = 'block';
-          logoutBtn.style.display = 'none'; // Hide logout button
+          if (studentLoginForm) studentLoginForm.style.display = 'block';
+          if (logoutBtn) logoutBtn.style.display = 'none';
         }
       } else {
         welcomeMessage.textContent = 'Hello!';
@@ -343,21 +356,19 @@
         loginPrompt.textContent = 'Please log in to view your allocations.';
         loginPrompt.style.display = 'block';
         studentAllocationsSection.style.display = 'none';
-        studentLoginForm.style.display = 'block'; // Show login form
-        logoutBtn.style.display = 'none'; // Hide logout button
+        if (studentLoginForm) studentLoginForm.style.display = 'block';
+        if (logoutBtn) logoutBtn.style.display = 'none';
       }
 
       // Handle student login form submission
-      const studentLoginForm = document.getElementById('studentLoginForm');
       if (studentLoginForm) {
         studentLoginForm.addEventListener('submit', async (event) => {
-          event.preventDefault(); // Prevent default form submission
+          event.preventDefault();
 
           const studentName = document.getElementById('studentName').value;
           const studentId = document.getElementById('studentId').value;
 
           if (studentName && studentId) {
-            // Fetch full student details from the backend
             try {
               const studentResponse = await fetch(`${API_BASE_URL}/students/${studentId}`);
               if (!studentResponse.ok) {
@@ -369,7 +380,7 @@
                 name: studentData.name || studentName,
                 id: studentData.id || studentId,
                 type: 'student',
-                photo: studentData.photo || '' // Include photo from fetched data
+                photo: studentData.photo || ''
               };
               sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
               
@@ -383,8 +394,8 @@
                 studentPhotoDisplay.style.display = 'none';
               }
               loginPrompt.style.display = 'none';
-              studentLoginForm.style.display = 'none'; // Hide login form on successful login
-              logoutBtn.style.display = 'inline-block'; // Show logout button on successful login
+              studentLoginForm.style.display = 'none';
+              if (logoutBtn) logoutBtn.style.display = 'inline-block';
               displayStudentAllocations(currentUser.id);
             } catch (error) {
               console.error('Error during student login/fetch:', error);

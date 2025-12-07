@@ -224,6 +224,15 @@
       transform: translateY(-2px);
       box-shadow: 0 6px 18px rgba(255, 0, 110, 0.45);
     }
+    .export-btn {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      margin-bottom: 20px;
+    }
+    .export-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+    }
     @media (max-width: 768px) {
       nav ul {
         flex-direction: column;
@@ -334,6 +343,8 @@
   <main>
     <h1>View teacher Allocations</h1>
     <div id="msg"></div>
+
+    <button id="exportBtn" class="export-btn">Export to CSV</button>
 
     <table>
       <thead>
@@ -513,6 +524,50 @@
         showMessage('error', 'An error occurred while updating the allocation.');
       }
     };
+
+    const exportBtn = document.getElementById('exportBtn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', () => {
+            if (!allAllocations.length) {
+                showMessage('error', 'No data to export.');
+                return;
+            }
+
+            const headers = [
+                "Date", "Subject", "Branch", "Course", "Semester", 
+                "Room", "Floor", "Teacher ID", "Teacher Name", "Start Time", "End Time"
+            ];
+            
+            const csvRows = allAllocations.map(row => {
+                const teacher = allTeachers.find(t => t.id === row.teacher_id);
+                const teacherName = teacher ? teacher.name : 'N/A';
+                return [
+                    `"${(row.exam_date || '').replace(/"/g, '""')}"`, 
+                    `"${(row.subject || '').replace(/"/g, '""')}"`, 
+                    `"${(row.branch || '').replace(/"/g, '""')}"`, 
+                    `"${(row.course || '').replace(/"/g, '""')}"`, 
+                    `"${(row.semester || '').replace(/"/g, '""')}"`, 
+                    `"${(row.room || '').replace(/"/g, '""')}"`, 
+                    `"${(row.floor || '').replace(/"/g, '""')}"`, 
+                    `"${(row.teacher_id || '').replace(/"/g, '""')}"`, 
+                    `"${teacherName.replace(/"/g, '""')}"`, 
+                    `"${(row.startTime || '').replace(/"/g, '""')}"`, 
+                    `"${(row.endTime || '').replace(/"/g, '""')}"`
+                ].join(',');
+            });
+
+            const csvContent = [headers.join(',')].concat(csvRows).join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `allocations_${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        });
+    }
 
     fetchAllocations(); // Initial load
 

@@ -742,7 +742,7 @@ def get_teacher_allocations(teacher_id):
 @app.route('/student_allocations', methods=['POST'])
 def add_student_allocation():
     data = request.get_json()
-    required_fields = ['student_name', 'student_id', 'student_semester', 'student_branch', 'student_course', 'room_name', 'room_floor', 'seat_number']
+    required_fields = ['student_name', 'student_id', 'student_semester', 'student_branch', 'student_course', 'room_name', 'room_floor', 'seat_number', 'start_time', 'end_time', 'exam_date', 'subject']
     if not all(field in data for field in required_fields):
         return jsonify({'message': 'Missing student allocation details'}), 400
 
@@ -750,9 +750,13 @@ def add_student_allocation():
         'student_id': data['student_id'],
         'room_name': data['room_name'],
         'student_semester': data['student_semester'],
-        'seat_number': data['seat_number']
+        'seat_number': data['seat_number'],
+        'start_time': data['start_time'],
+        'end_time': data['end_time'],
+        'exam_date': data['exam_date'],
+        'subject': data['subject']
     }):
-        return jsonify({'message': 'Student allocation for this student, room, and semester already exists'}), 409
+        return jsonify({'message': 'Student allocation for this student, room, semester, seat, start time, end time, exam date and subject already exists'}), 409
 
     new_student_allocation = {
         'student_name': data['student_name'],
@@ -762,7 +766,11 @@ def add_student_allocation():
         'student_course': data['student_course'],
         'room_name': data['room_name'],
         'room_floor': data['room_floor'],
-        'seat_number': data['seat_number']
+        'seat_number': data['seat_number'],
+        'start_time': data['start_time'],
+        'end_time': data['end_time'],
+        'exam_date': data['exam_date'],
+        'subject': data['subject']
     }
     student_allocations_collection.insert_one(new_student_allocation)
     new_student_allocation['_id'] = str(new_student_allocation['_id'])
@@ -791,9 +799,12 @@ def get_student_allocation(student_allocation_id):
 def update_student_allocation(student_allocation_id):
     data = request.get_json()
     updated_fields = {}
-    updatable_fields = ['student_name', 'student_id', 'student_semester', 'student_branch', 'student_course', 'room_name', 'room_floor', 'seat_number']
+    updatable_fields = ['student_name', 'student_id', 'student_semester', 'student_branch', 'student_course', 'room_name', 'room_floor', 'seat_number', 'start_time', 'end_time', 'exam_date', 'subject']
     for field in updatable_fields:
         if field in data: updated_fields[field] = data[field]
+
+    print(f"Received student_allocation_id for update: {student_allocation_id}")
+    print(f"Received updated_fields: {updated_fields}")
 
     if not updated_fields:
         return jsonify({'message': 'No fields to update'}), 400
